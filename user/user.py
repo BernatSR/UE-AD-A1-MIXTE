@@ -9,7 +9,7 @@ PORT = 3203
 HOST = '0.0.0.0'
 
 # Ouvre fichier json -> charge en dict Python -> extrait la liste d'utilisateurs
-with open('{}/databases/users.json'.format("."), "r") as jsf:
+with open('{}/data/users.json'.format("."), "r") as jsf:
    users = json.load(jsf)["users"]
 
 def now_iso():
@@ -39,9 +39,8 @@ def add_user(userid):
 
 
 def write(users):
-    with open('{}/databases/users.json'.format("."), 'w') as f:
+    with open('{}/data/users.json'.format("."), 'w') as f:
         json.dump({"users": users}, f, ensure_ascii=False, indent=2)
-
 
 
 @app.route("/users/<userid>/<name>", methods=['PUT'])
@@ -69,6 +68,23 @@ def del_user(userid):
    res = make_response(jsonify({"error":"user ID not found"}),400)
    return res
 
+@app.route("/users/<userid>/admin", methods=['GET'])
+def check_admin(userid):
+   for user in users:
+      if str(user["id"]) == str(userid):
+         return make_response(jsonify({"is_admin": user.get("is_admin", False)}), 200)
+   
+   res = make_response(jsonify({"error":"user ID not found"}), 404)
+   return res
+
+@app.route("/users/<userid>", methods=['GET'])
+def get_user(userid):
+   for user in users:
+      if str(user["id"]) == str(userid):
+         return make_response(jsonify(user), 200)
+   
+   res = make_response(jsonify({"error":"user ID not found"}), 404)
+   return res
 
 if __name__ == "__main__":
    print("Server running in port %s"%(PORT))
