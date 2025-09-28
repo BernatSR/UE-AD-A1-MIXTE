@@ -1,0 +1,38 @@
+scalar DateYMD
+
+type Movie {
+  id: ID!
+  title: String
+  director: String
+  rating: Float
+}
+
+type Booking {
+  id: ID!
+  userId: ID!
+  movieId: ID!
+  date: DateYMD!
+  movie: Movie
+}
+
+type BookingWithMovie {
+  booking: Booking!
+  movie: Movie
+}
+
+input AddBookingInput {
+  userId: ID!
+  movieId: ID!
+  date: DateYMD!
+}
+
+type Query {
+  bookings: [Booking!]!
+  booking(id: ID!): Booking
+  booking_with_userid(userId: ID!): [BookingWithMovie!]!
+}
+
+type Mutation {
+  addBooking(input: AddBookingInput!): Booking!
+  deleteBooking(id: ID!): Boolean!
+}
