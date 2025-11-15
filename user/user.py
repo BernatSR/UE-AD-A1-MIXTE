@@ -9,15 +9,26 @@ PORT = 3203
 HOST = '0.0.0.0'
 
 # Ouvre fichier json -> charge en dict Python -> extrait la liste d'utilisateurs
-with open('{}/data/users.json'.format("."), "r") as jsf:
+with open('{}/databases/users.json'.format("."), "r") as jsf:
    users = json.load(jsf)["users"]
+
+def write(users):
+    with open('{}/databases/users.json'.format("."), 'w') as f:
+        json.dump({"users": users}, f, ensure_ascii=False, indent=2)
 
 def now_iso():
     return datetime.utcnow().isoformat()
 
+
+#Route
+
 @app.route("/", methods=['GET'])
 def profil():
    return "<h1 style='color:blue'>Welcome to the User service!</h1>"
+
+#CRUD user
+
+#CREATE
 
 @app.route("/adduser/<userid>", methods=['POST'])
 def add_user(userid):
@@ -38,10 +49,39 @@ def add_user(userid):
    return res
 
 
-def write(users):
-    with open('{}/data/users.json'.format("."), 'w') as f:
-        json.dump({"users": users}, f, ensure_ascii=False, indent=2)
+#READ
 
+@app.route("/users", methods=['GET'])
+def get_all_users():
+    """Renvoie la liste complète des utilisateurs."""
+
+    # Vérification admin
+    if request.headers.get("X-Admin", "false").lower() != "true":
+        return make_response(jsonify({"error": "admin only"}), 403)
+    
+    return make_response(jsonify(users), 200)
+
+
+@app.route("/users/<userid>", methods=['GET'])
+def get_user(userid):
+    """Renvoie un utilisateur précis selon son ID."""
+    for user in users:
+        if str(user["id"]) == str(userid):
+            return make_response(jsonify(user), 200)
+    return make_response(jsonify({"error": "user ID not found"}), 404)
+
+
+@app.route("/users/<userid>/admin", methods=['GET'])
+def check_admin(userid):
+   for user in users:
+      if str(user["id"]) == str(userid):
+         return make_response(jsonify({"is_admin": user.get("is_admin", False)}), 200)
+   
+   res = make_response(jsonify({"error":"user ID not found"}), 404)
+   return res
+
+
+#UPDATE
 
 @app.route("/users/<userid>/<name>", methods=['PUT'])
 def update_user_name(userid, name):
@@ -57,34 +97,20 @@ def update_user_name(userid, name):
     return res
 
 
+#DELETE
+
 @app.route("/users/<userid>", methods=['DELETE'])
 def del_user(userid):
    for user in users:
       if str(user["id"]) == str(userid):
          users.remove(user)
-         write(users) # permet d'update le ficheir json
+         write(users) 
          return make_response(jsonify(user),200)
 
    res = make_response(jsonify({"error":"user ID not found"}),400)
    return res
 
-@app.route("/users/<userid>/admin", methods=['GET'])
-def check_admin(userid):
-   for user in users:
-      if str(user["id"]) == str(userid):
-         return make_response(jsonify({"is_admin": user.get("is_admin", False)}), 200)
-   
-   res = make_response(jsonify({"error":"user ID not found"}), 404)
-   return res
 
-@app.route("/users/<userid>", methods=['GET'])
-def get_user(userid):
-   for user in users:
-      if str(user["id"]) == str(userid):
-         return make_response(jsonify(user), 200)
-   
-   res = make_response(jsonify({"error":"user ID not found"}), 404)
-   return res
 
 if __name__ == "__main__":
    print("Server running in port %s"%(PORT))
