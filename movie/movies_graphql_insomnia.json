@@ -125,29 +125,12 @@
       "_id": "req_graphql_update_movie",
       "_type": "request",
       "parentId": "fld_movies_graphql",
-      "name": "Mutation - updateMovie",
+      "name": "Mutation - updateMovieNameAndRating",
       "method": "POST",
       "url": "{{ _.base_url }}/graphql",
       "body": {
         "mimeType": "application/json",
         "text": "{ \"query\": \"mutation { updateMovie(id: \\\"a8034f44-aee4-44cf-b32c-74cf452aaaae\\\", input: { title: \\\"The Martian (Edited)\\\", rating: 9.1 }) { id title director rating } }\" }"
-      },
-      "headers": [
-        { "name": "Content-Type", "value": "application/json" },
-        { "name": "X-Admin", "value": "true" }
-      ],
-      "parameters": []
-    },
-    {
-      "_id": "req_graphql_update_movie_rating",
-      "_type": "request",
-      "parentId": "fld_movies_graphql",
-      "name": "Mutation - updateMovieRating",
-      "method": "POST",
-      "url": "{{ _.base_url }}/graphql",
-      "body": {
-        "mimeType": "application/json",
-        "text": "{ \"query\": \"mutation { updateMovieRating(id: \\\"a8034f44-aee4-44cf-b32c-74cf452aaaae\\\", rating: 7.9) { id title rating } }\" }"
       },
       "headers": [
         { "name": "Content-Type", "value": "application/json" },

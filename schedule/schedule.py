@@ -10,7 +10,7 @@ import schedule_pb2
 import schedule_pb2_grpc
 
 PORT = 3202
-DATABASE_PATH = "./databases/times.json"
+DATABASE_PATH = "./data/times.json"
 
 
 

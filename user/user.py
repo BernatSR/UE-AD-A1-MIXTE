@@ -15,7 +15,7 @@ with open('{}/data/users.json'.format("."), "r") as jsf:
    users = json.load(jsf)["users"]
 
 def write(users):
-    with open('{}/databases/users.json'.format("."), 'w') as f:
+    with open('{}/data/users.json'.format("."), 'w') as f:
         json.dump({"users": users}, f, ensure_ascii=False, indent=2)
 
 def name_to_id(name: str):
@@ -79,16 +79,16 @@ def add_user():
 def get_all_users():
     """Renvoie la liste complète des utilisateurs."""
 
-    # On récupère l'id de celui qui fait la demande
     caller_id = request.headers.get("X-User-Id")
 
-    # Si aucun header fourni
     if caller_id is None:
         return make_response(jsonify({"error": "missing X-User-Id header"}), 400)
 
-    # On vérifie s'il est admin
     if not is_admin(caller_id):
         return make_response(jsonify({"error": "admin only"}), 403)
+
+    return make_response(jsonify(users), 200)
+
 
 
 @app.route("/users/<userid>", methods=['GET'])

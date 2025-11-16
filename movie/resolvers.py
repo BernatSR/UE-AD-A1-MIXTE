@@ -10,12 +10,11 @@ from ariadne import (
 )
 from graphql import GraphQLError
 
-
 MOVIES_PATH = "./data/movies.json"
 ACTORS_PATH = "./data/actors.json"
 
 
-# Helpers JSON 
+# ---------- Helpers JSON ----------
 
 def load_movies():
     with open(MOVIES_PATH, "r", encoding="utf-8") as f:
@@ -37,7 +36,7 @@ def save_actors(actors):
         json.dump({"actors": actors}, f, ensure_ascii=False, indent=2)
 
 
-# Fonctions Movie
+# ---------- Fonctions Movie ----------
 
 def filter_movies(movie_id=None, title=None, director=None):
     movies = load_movies()
@@ -113,7 +112,7 @@ def delete_movie(movie_id):
     return None
 
 
-# Fonctions Actor
+# ---------- Fonctions Actor ----------
 
 def get_all_actors():
     return load_actors()
@@ -141,7 +140,7 @@ def get_movies_for_actor(actor):
     return [movie_map[mid] for mid in movie_ids if mid in movie_map]
 
 
-#  Types Ariadne
+# ---------- Types Ariadne ----------
 
 query = QueryType()
 mutation = MutationType()
@@ -156,7 +155,7 @@ def require_admin(info):
         raise GraphQLError("admin only")
 
 
-# Query resolvers 
+# ---------- Query resolvers ----------
 
 @query.field("movies")
 def resolve_movies(_, info, id=None, title=None, director=None):
@@ -178,22 +177,28 @@ def resolve_actor(_, info, id):
     return get_actor_by_id(id)
 
 
-# Field resolvers 
+# ---------- Field resolvers ----------
 
 @movie_type.field("actors")
 def resolve_movie_actors(movie, info):
     movie_id = movie.get("id")
     if not movie_id:
         return []
-    return get_actors_for_movie(movie_id)
+    actors = get_actors_for_movie(movie_id)
+    if actors is None:
+        return []
+    return actors
 
 
 @actor_type.field("films")
 def resolve_actor_films(actor, info):
-    return get_movies_for_actor(actor)
+    movies = get_movies_for_actor(actor)
+    if movies is None:
+        return []
+    return movies
 
 
-# Mutations
+# ---------- Mutations ----------
 
 @mutation.field("createMovie")
 def resolve_create_movie(_, info, input):
@@ -205,6 +210,44 @@ def resolve_create_movie(_, info, input):
     if not title or not director:
         raise GraphQLError("Missing 'title' or 'director'")
 
+    return create_movie(title=title, director=director, rating=rating)
+
+
+@mutation.field("updateMovie")
+def resolve_update_movie(_, info, id, input):
+    require_admin(info)
+    title = input.get("title")
+    director = input.get("director")
+    rating = input.get("rating")
+
+    updated = update_movie(id, title=title, director=director, rating=rating)
+    if updated is None:
+        raise GraphQLError("movie ID not found")
+    return updated
+
+
+@mutation.field("updateMovieRating")
+def resolve_update_movie_rating(_, info, id, rating):
+    require_admin(info)
+    updated = update_movie_rating(id, rating)
+    if updated is None:
+        raise GraphQLError("movie ID not found")
+    return updated
+
+
+@mutation.field("deleteMovie")
+def resolve_delete_movie(_, info, id):
+    require_admin(info)
+    deleted = delete_movie(id)
+    if deleted is None:
+        raise GraphQLError("movie ID not found")
+    return deleted
+
+
+# ---------- Schéma ----------
 
 type_defs = load_schema_from_path("movie.graphql")
-schema = make_executable_schema(type_defs, [query, mutation])
+schema = make_executable_schema(
+    type_defs,
+    [query, mutation, movie_type, actor_type],
+)
