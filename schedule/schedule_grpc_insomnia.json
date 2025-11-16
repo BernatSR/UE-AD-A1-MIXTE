@@ -1,0 +1,100 @@
+{
+  "_type": "export",
+  "__export_format": 4,
+  "__export_source": "",
+  "resources": [
+    {
+      "_id": "wrk_schedule_grpc",
+      "_type": "workspace",
+      "name": "Schedule gRPC Service",
+      "parentId": null
+    },
+    {
+      "_id": "env_schedule_grpc_base",
+      "_type": "environment",
+      "parentId": "wrk_schedule_grpc",
+      "name": "Base Environment",
+      "data": {
+        "grpc_host": "localhost:3202"
+      }
+    },
+    {
+      "_id": "fld_schedule_grpc",
+      "_type": "request_group",
+      "parentId": "wrk_schedule_grpc",
+      "name": "Schedule gRPC"
+    },
+
+    {
+      "_id": "req_schedule_get_all",
+      "_type": "grpc_request",
+      "parentId": "fld_schedule_grpc",
+      "name": "GetAllSchedules",
+      "url": "{{ _.grpc_host }}",
+      "body": {
+        "text": "{}"
+      },
+      "metaSortKey": -1000
+    },
+
+    {
+      "_id": "req_schedule_get_by_date",
+      "_type": "grpc_request",
+      "parentId": "fld_schedule_grpc",
+      "name": "GetScheduleByDate",
+      "url": "{{ _.grpc_host }}",
+      "body": {
+        "text": "{ \"date\": \"20251120\" }"
+      },
+      "metaSortKey": -900
+    },
+
+    {
+      "_id": "req_schedule_create",
+      "_type": "grpc_request",
+      "parentId": "fld_schedule_grpc",
+      "name": "CreateSchedule",
+      "url": "{{ _.grpc_host }}",
+      "body": {
+        "text": "{ \"date\": \"20251120\", \"movies\": [ \"a8034f44-aee4-44cf-b32c-74cf452aaaae\", \"720d006c-3a57-4b6a-b18f-9b713b073f3c\" ] }"
+      },
+      "metaSortKey": -800
+    },
+
+    {
+      "_id": "req_schedule_update",
+      "_type": "grpc_request",
+      "parentId": "fld_schedule_grpc",
+      "name": "UpdateSchedule",
+      "url": "{{ _.grpc_host }}",
+      "body": {
+        "text": "{ \"date\": \"20251120\", \"movies\": [ \"39ab85e5-5e8e-4dc5-afea-65dc368bd7ab\", \"7daf7208-be4d-4944-a3ae-c1c2f516f3e6\" ] }"
+      },
+      "metaSortKey": -700
+    },
+
+    {
+      "_id": "req_schedule_delete",
+      "_type": "grpc_request",
+      "parentId": "fld_schedule_grpc",
+      "name": "DeleteSchedule",
+      "url": "{{ _.grpc_host }}",
+      "body": {
+        "text": "{ \"date\": \"20251120\" }"
+      },
+      "metaSortKey": -600
+    },
+
+    {
+      "_id": "req_schedule_best_rated",
+      "_type": "grpc_request",
+      "parentId": "fld_schedule_grpc",
+      "name": "GetBestRatedMovie",
+      "url": "{{ _.grpc_host }}",
+      "body": {
+        "text": "{ \"date\": \"20251120\" }"
+      },
+      "metaSortKey": -500
+    }
+  ]
+}

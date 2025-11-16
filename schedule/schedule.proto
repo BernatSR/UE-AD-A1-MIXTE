@@ -1,0 +1,57 @@
+syntax = "proto3";
+
+package schedule;
+
+import "google/protobuf/empty.proto";
+
+service Schedule {
+  rpc GetAllSchedules(google.protobuf.Empty) returns (ListSchedulesResponse);
+  rpc GetScheduleByDate(DateRequest) returns (ScheduleEntry);
+  rpc CreateSchedule(CreateScheduleRequest) returns (ScheduleEntry);
+  rpc UpdateSchedule(UpdateScheduleRequest) returns (ScheduleEntry);
+  rpc DeleteSchedule(DateRequest) returns (DeleteScheduleResponse);
+  rpc GetBestRatedMovie(DateRequest) returns (BestRatedResponse);
+}
+
+message DateRequest {
+  string date = 1; // format YYYYMMDD
+}
+
+message ScheduleEntry {
+  string date = 1;
+  repeated string movies = 2; // liste d'IDs de films
+}
+
+message ListSchedulesResponse {
+  repeated ScheduleEntry schedules = 1;
+}
+
+message CreateScheduleRequest {
+  string date = 1;
+  repeated string movies = 2;
+}
+
+message UpdateScheduleRequest {
+  string date = 1;
+  repeated string movies = 2;
+}
+
+message DeleteScheduleResponse {
+  bool success = 1;
+  string message = 2;
+  ScheduleEntry deleted_entry = 3;
+}
+
+message Movie {
+  string id = 1;
+  string title = 2;
+  double rating = 3;
+  string director = 4;
+}
+
+message BestRatedResponse {
+  string date = 1;
+  Movie movie = 2;
+  double rating = 3;
+  string message = 4;
+}
