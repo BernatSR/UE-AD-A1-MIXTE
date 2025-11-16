@@ -1,38 +1,67 @@
-scalar DateYMD
+type UserBooking {
+  userid: ID!
+  dates: [BookingDate!]!
+}
 
-type Movie {
+type BookingDate {
+  date: String!
+  movies: [ID!]!
+}
+
+type DetailedUserBooking {
+  userid: ID!
+  dates: [DetailedBookingDate!]!
+}
+
+type DetailedBookingDate {
+  date: String!
+  movies: [MovieDetails!]!
+}
+
+type MovieDetails {
   id: ID!
   title: String
   director: String
   rating: Float
+  error: String
 }
 
-type Booking {
-  id: ID!
-  userId: ID!
-  movieId: ID!
-  date: DateYMD!
-  movie: Movie
+type StatsMoviesForDate {
+  date: String!
+  movies: [StatsMovieCount!]!
 }
 
-type BookingWithMovie {
-  booking: Booking!
-  movie: Movie
+type StatsMovieCount {
+  movie: MovieDetails!
+  count: Int!
 }
 
-input AddBookingInput {
-  userId: ID!
-  movieId: ID!
-  date: DateYMD!
+type AddBookingResponse {
+  message: String!
+  date: String!
+  movies: [ID!]!
+}
+
+type DeleteBookingResponse {
+  message: String!
+  userid: ID!
+  date: String!
+  movie: ID!
 }
 
 type Query {
-  bookings: [Booking!]!
-  booking(id: ID!): Booking
-  booking_with_userid(userId: ID!): [BookingWithMovie!]!
+  allBookings: [UserBooking!]!
+  bookingsByUser(userid: ID!): UserBooking
+  detailedBookingsByUser(userid: ID!): DetailedUserBooking
+  statsMoviesForDate(date: String!): StatsMoviesForDate
 }
 
 type Mutation {
-  addBooking(input: AddBookingInput!): Booking!
-  deleteBooking(id: ID!): Boolean!
+  addBooking(userid: ID!, date: String!, movies: [ID!]!): AddBookingResponse!
+  deleteBooking(userid: ID!, date: String!, movieid: ID!): DeleteBookingResponse!
+}
+
+schema {
+  query: Query
+  mutation: Mutation
 }
