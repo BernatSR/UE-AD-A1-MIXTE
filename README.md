@@ -18,6 +18,8 @@ Cas de test Insomnia:
 
 Note: le service user a été modifié pour passer de la vérificaion de l'admin via le header à une vérification par une route.
 
+Cas de test:
+
 
 Organisation du projet:
 
@@ -28,7 +30,7 @@ Par exemple un point d’entrée dans Booking permettant de récupérer les rés
 
 Si vous avez besoin, vous pouvez ajouter des flèches entre les services.
 
-fournir fichier de test insomnia
+reste à faire: check curl schedule et si endpoint supp est bien là
 
 revoir docker-compose et un autre qui met à jour la liste des films programmés pour cette date
 
