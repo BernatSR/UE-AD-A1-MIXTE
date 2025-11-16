@@ -30,7 +30,7 @@ Par exemple un point d’entrée dans Booking permettant de récupérer les rés
 
 Si vous avez besoin, vous pouvez ajouter des flèches entre les services.
 
-reste à faire: check curl schedule et si endpoint supp est bien là
+reste à faire: check curl schedule et si endpoint supp est bien là / 2 dernier endpoints de booking pour addbooking et deletebooking mais d'abord tester schedule
 
 revoir docker-compose et un autre qui met à jour la liste des films programmés pour cette date
 
