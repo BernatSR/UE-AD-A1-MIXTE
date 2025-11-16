@@ -112,6 +112,11 @@ def delete_movie(movie_id):
     return None
 
 
+def is_movie_referenced(movie_id):
+    actors = load_actors()
+    return any(movie_id in a.get("films", []) for a in actors)
+
+
 # ---------- Fonctions Actor ----------
 
 def get_all_actors():
@@ -153,6 +158,19 @@ def require_admin(info):
     is_admin = request.headers.get("X-Admin", "false").lower() == "true"
     if not is_admin:
         raise GraphQLError("admin only")
+    
+def movie_already_exists(title, director):
+    movies = load_movies()
+    t = title.strip().lower()
+    d = director.strip().lower()
+    for m in movies:
+        if (
+            str(m.get("title", "")).strip().lower() == t
+            and str(m.get("director", "")).strip().lower() == d
+        ):
+            return True
+    return False
+
 
 
 # ---------- Query resolvers ----------
@@ -175,6 +193,36 @@ def resolve_actors(_, info):
 @query.field("actor")
 def resolve_actor(_, info, id):
     return get_actor_by_id(id)
+
+
+@query.field("moviesByActor")
+def resolve_movies_by_actor(_, info, actorId):
+    actor = get_actor_by_id(actorId)
+    if actor is None:
+        return []
+    return get_movies_for_actor(actor)
+
+
+@query.field("actorsByMovie")
+def resolve_actors_by_movie(_, info, movieId):
+    return get_actors_for_movie(movieId)
+
+
+@query.field("topRatedMovies")
+def resolve_top_rated_movies(_, info, limit):
+    movies = load_movies()
+    movies_sorted = sorted(
+        movies,
+        key=lambda m: m.get("rating", 0.0),
+        reverse=True,
+    )
+    try:
+        n = int(limit)
+    except (TypeError, ValueError):
+        n = 0
+    if n <= 0:
+        return []
+    return movies_sorted[:n]
 
 
 # ---------- Field resolvers ----------
@@ -210,7 +258,11 @@ def resolve_create_movie(_, info, input):
     if not title or not director:
         raise GraphQLError("Missing 'title' or 'director'")
 
+    if movie_already_exists(title, director):
+        raise GraphQLError("movie with same title and director already exists")
+
     return create_movie(title=title, director=director, rating=rating)
+
 
 
 @mutation.field("updateMovie")
@@ -242,6 +294,115 @@ def resolve_delete_movie(_, info, id):
     if deleted is None:
         raise GraphQLError("movie ID not found")
     return deleted
+
+
+@mutation.field("deleteMovieSafe")
+def resolve_delete_movie_safe(_, info, id):
+    require_admin(info)
+
+    if is_movie_referenced(id):
+        raise GraphQLError("cannot delete movie: still referenced by actors")
+
+    deleted = delete_movie(id)
+    if deleted is None:
+        raise GraphQLError("movie ID not found")
+    return deleted
+
+
+@mutation.field("addFilmToActor")
+def resolve_add_film_to_actor(_, info, actorId, movieId):
+    require_admin(info)
+
+    actors = load_actors()
+    movies = load_movies()
+
+    movie = next((m for m in movies if m["id"] == movieId), None)
+    if movie is None:
+        raise GraphQLError("movie ID not found")
+
+    actor = next((a for a in actors if a["id"] == actorId), None)
+    if actor is None:
+        raise GraphQLError("actor ID not found")
+
+    films = actor.get("films", [])
+    if movieId not in films:
+        films.append(movieId)
+    actor["films"] = films
+
+    save_actors(actors)
+    return actor
+
+
+@mutation.field("removeFilmFromActor")
+def resolve_remove_film_from_actor(_, info, actorId, movieId):
+    require_admin(info)
+
+    actors = load_actors()
+    movies = load_movies()
+
+    movie = next((m for m in movies if m["id"] == movieId), None)
+    if movie is None:
+        raise GraphQLError("movie ID not found")
+
+    actor = next((a for a in actors if a["id"] == actorId), None)
+    if actor is None:
+        raise GraphQLError("actor ID not found")
+
+    films = actor.get("films", [])
+
+    if movieId not in films:
+        raise GraphQLError("actor is not associated with this movie")
+
+    films.remove(movieId)
+    actor["films"] = films
+
+    save_actors(actors)
+    return actor
+
+
+@mutation.field("createActor")
+def resolve_create_actor(_, info, id, firstname, lastname, birthyear, films):
+    require_admin(info)
+
+    actors = load_actors()
+    movies = load_movies()
+
+    if any(a["id"] == id for a in actors):
+        raise GraphQLError("actor ID already exists")
+
+    for film_id in films:
+        if not any(m["id"] == film_id for m in movies):
+            raise GraphQLError(f"movie '{film_id}' does not exist")
+
+    new_actor = {
+        "id": id,
+        "firstname": firstname,
+        "lastname": lastname,
+        "birthyear": int(birthyear),
+        "films": films,
+    }
+
+    actors.append(new_actor)
+    save_actors(actors)
+    return new_actor
+
+
+@mutation.field("deleteActor")
+def resolve_delete_actor(_, info, id):
+    require_admin(info)
+
+    actors = load_actors()
+
+    actor = next((a for a in actors if a["id"] == id), None)
+    if actor is None:
+        raise GraphQLError("actor ID not found")
+
+    if actor.get("films", []):
+        raise GraphQLError("cannot delete actor: films are still associated")
+
+    actors.remove(actor)
+    save_actors(actors)
+    return actor
 
 
 # ---------- Schéma ----------

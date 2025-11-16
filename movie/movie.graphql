@@ -32,6 +32,10 @@ type Query {
 
   actors: [Actor!]!
   actor(id: ID!): Actor
+
+  moviesByActor(actorId: ID!): [Movie!]!
+  actorsByMovie(movieId: ID!): [Actor!]!
+  topRatedMovies(limit: Int!): [Movie!]!
 }
 
 type Mutation {
@@ -39,4 +43,18 @@ type Mutation {
   updateMovie(id: ID!, input: MovieUpdateInput!): Movie!
   updateMovieRating(id: ID!, rating: Float!): Movie!
   deleteMovie(id: ID!): Movie!
+  deleteMovieSafe(id: ID!): Movie!
+
+  addFilmToActor(actorId: ID!, movieId: ID!): Actor!
+  removeFilmFromActor(actorId: ID!, movieId: ID!): Actor!
+
+  createActor(
+    id: ID!
+    firstname: String!
+    lastname: String!
+    birthyear: Int!
+    films: [ID!]!
+  ): Actor!
+
+  deleteActor(id: ID!): Actor!
 }
