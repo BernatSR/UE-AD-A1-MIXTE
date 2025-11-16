@@ -1,0 +1,233 @@
+{
+  "_type": "export",
+  "__export_format": 4,
+  "__export_source": "",
+  "resources": [
+    {
+      "_id": "wrk_user_service",
+      "_type": "workspace",
+      "name": "User Service (Flask)",
+      "parentId": null
+    },
+    {
+      "_id": "env_user_service_base",
+      "_type": "environment",
+      "parentId": "wrk_user_service",
+      "name": "Base Environment",
+      "data": {
+        "base_url": "http://localhost:3203"
+      }
+    },
+    {
+      "_id": "fld_user_routes",
+      "_type": "request_group",
+      "parentId": "wrk_user_service",
+      "name": "User routes"
+    },
+    {
+      "_id": "req_root",
+      "_type": "request",
+      "parentId": "fld_user_routes",
+      "name": "GET /",
+      "method": "GET",
+      "url": "{{ _.base_url }}/",
+      "body": {},
+      "headers": [],
+      "parameters": []
+    },
+    {
+      "_id": "req_create_user_ok",
+      "_type": "request",
+      "parentId": "fld_user_routes",
+      "name": "POST /users OK",
+      "method": "POST",
+      "url": "{{ _.base_url }}/users",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"name\": \"New User\"\n}"
+      },
+      "headers": [
+        { "name": "Content-Type", "value": "application/json" }
+      ],
+      "parameters": []
+    },
+    {
+      "_id": "req_create_user_missing_name",
+      "_type": "request",
+      "parentId": "fld_user_routes",
+      "name": "POST /users missing name",
+      "method": "POST",
+      "url": "{{ _.base_url }}/users",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"fullname\": \"Wrong Field\"\n}"
+      },
+      "headers": [
+        { "name": "Content-Type", "value": "application/json" }
+      ],
+      "parameters": []
+    },
+    {
+      "_id": "req_create_user_conflict",
+      "_type": "request",
+      "parentId": "fld_user_routes",
+      "name": "POST /users conflict",
+      "method": "POST",
+      "url": "{{ _.base_url }}/users",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"name\": \"Chris Rivers\"\n}"
+      },
+      "headers": [
+        { "name": "Content-Type", "value": "application/json" }
+      ],
+      "parameters": []
+    },
+    {
+      "_id": "req_get_all_users_admin_ok",
+      "_type": "request",
+      "parentId": "fld_user_routes",
+      "name": "GET /users admin OK",
+      "method": "GET",
+      "url": "{{ _.base_url }}/users",
+      "body": {},
+      "headers": [
+        { "name": "X-User-Id", "value": "michael_scott" }
+      ],
+      "parameters": []
+    },
+    {
+      "_id": "req_get_all_users_non_admin",
+      "_type": "request",
+      "parentId": "fld_user_routes",
+      "name": "GET /users non admin",
+      "method": "GET",
+      "url": "{{ _.base_url }}/users",
+      "body": {},
+      "headers": [
+        { "name": "X-User-Id", "value": "jim_halpert" }
+      ],
+      "parameters": []
+    },
+    {
+      "_id": "req_get_all_users_missing_header",
+      "_type": "request",
+      "parentId": "fld_user_routes",
+      "name": "GET /users missing header",
+      "method": "GET",
+      "url": "{{ _.base_url }}/users",
+      "body": {},
+      "headers": [],
+      "parameters": []
+    },
+    {
+      "_id": "req_get_single_user_ok",
+      "_type": "request",
+      "parentId": "fld_user_routes",
+      "name": "GET /users/{id} OK",
+      "method": "GET",
+      "url": "{{ _.base_url }}/users/chris_rivers",
+      "body": {},
+      "headers": [],
+      "parameters": []
+    },
+    {
+      "_id": "req_get_single_user_not_found",
+      "_type": "request",
+      "parentId": "fld_user_routes",
+      "name": "GET /users/{id} not found",
+      "method": "GET",
+      "url": "{{ _.base_url }}/users/unknown_user",
+      "body": {},
+      "headers": [],
+      "parameters": []
+    },
+    {
+      "_id": "req_check_admin_true",
+      "_type": "request",
+      "parentId": "fld_user_routes",
+      "name": "GET /users/{id}/admin true",
+      "method": "GET",
+      "url": "{{ _.base_url }}/users/michael_scott/admin",
+      "body": {},
+      "headers": [],
+      "parameters": []
+    },
+    {
+      "_id": "req_check_admin_false",
+      "_type": "request",
+      "parentId": "fld_user_routes",
+      "name": "GET /users/{id}/admin false",
+      "method": "GET",
+      "url": "{{ _.base_url }}/users/jim_halpert/admin",
+      "body": {},
+      "headers": [],
+      "parameters": []
+    },
+    {
+      "_id": "req_check_admin_not_found",
+      "_type": "request",
+      "parentId": "fld_user_routes",
+      "name": "GET /users/{id}/admin not found",
+      "method": "GET",
+      "url": "{{ _.base_url }}/users/unknown_user/admin",
+      "body": {},
+      "headers": [],
+      "parameters": []
+    },
+    {
+      "_id": "req_update_user_ok",
+      "_type": "request",
+      "parentId": "fld_user_routes",
+      "name": "PUT /users/{id} OK",
+      "method": "PUT",
+      "url": "{{ _.base_url }}/users/pam_beesly",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"name\": \"Pam Beesly-Halpert\"\n}"
+      },
+      "headers": [
+        { "name": "Content-Type", "value": "application/json" }
+      ],
+      "parameters": []
+    },
+    {
+      "_id": "req_update_user_not_found",
+      "_type": "request",
+      "parentId": "fld_user_routes",
+      "name": "PUT /users/{id} not found",
+      "method": "PUT",
+      "url": "{{ _.base_url }}/users/unknown_user",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"name\": \"Nobody\"\n}"
+      },
+      "headers": [
+        { "name": "Content-Type", "value": "application/json" }
+      ],
+      "parameters": []
+    },
+    {
+      "_id": "req_delete_user_ok",
+      "_type": "request",
+      "parentId": "fld_user_routes",
+      "name": "DELETE /users/{id} OK",
+      "method": "DELETE",
+      "url": "{{ _.base_url }}/users/dwight_schrute",
+      "body": {},
+      "headers": [],
+      "parameters": []
+    },
+    {
+      "_id": "req_delete_user_not_found",
+      "_type": "request",
+      "parentId": "fld_user_routes",
+      "name": "DELETE /users/{id} not found",
+      "method": "DELETE",
+      "url": "{{ _.base_url }}/users/unknown_user",
+      "body": {},
+      "headers": [],
+      "parameters": []
+    }
+  ]
+}
