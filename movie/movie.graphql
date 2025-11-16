@@ -1,25 +1,42 @@
-type Query {
-    movie_with_id(_id: String!): Movie
-    actor_with_id(_id: String!): Actor
-    all_movies: [Movie]
-}
-type Mutation {
-    update_movie_rate(_id: String!, _rate: Float!, _user_id: String!): Movie
-    add_movie(_id: String!, _title: String!, _director: String!, _rating: Float!, _user_id: String!): Movie
-    delete_movie(_id: String!, _user_id: String!): String
-}
 type Movie {
-    id: String!
-    title: String!
-    director: String!
-    rating: Float!
-    actors: [Actor]
+  id: ID!
+  title: String!
+  rating: Float!
+  director: String!
+  actors: [Actor!]!
 }
 
 type Actor {
-    id: String!
-    firstname: String!
-    lastname: String!
-    birthyear: Int!
-    films: [String!]
+  id: ID!
+  firstname: String!
+  lastname: String!
+  birthyear: Int!
+  films: [Movie!]!
+}
+
+input MovieInput {
+  title: String!
+  director: String!
+  rating: Float
+}
+
+input MovieUpdateInput {
+  title: String
+  director: String
+  rating: Float
+}
+
+type Query {
+  movies(id: ID, title: String, director: String): [Movie!]!
+  movie(id: ID!): Movie
+
+  actors: [Actor!]!
+  actor(id: ID!): Actor
+}
+
+type Mutation {
+  createMovie(input: MovieInput!): Movie!
+  updateMovie(id: ID!, input: MovieUpdateInput!): Movie!
+  updateMovieRating(id: ID!, rating: Float!): Movie!
+  deleteMovie(id: ID!): Movie!
 }
