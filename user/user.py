@@ -11,7 +11,7 @@ PORT = 3203
 HOST = '0.0.0.0'
 
 # Ouvre fichier json -> charge en dict Python -> extrait la liste d'utilisateurs
-with open('{}/databases/users.json'.format("."), "r") as jsf:
+with open('{}/data/users.json'.format("."), "r") as jsf:
    users = json.load(jsf)["users"]
 
 def write(users):

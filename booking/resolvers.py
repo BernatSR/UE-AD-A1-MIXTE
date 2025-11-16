@@ -1,41 +1,121 @@
-from ariadne import QueryType, MutationType
+import json
+import re
+from datetime import datetime
+
+import requests
+from ariadne import (
+    QueryType,
+    MutationType,
+    load_schema_from_path,
+    make_executable_schema,
+)
 from graphql import GraphQLError
+
+BOOKINGS_PATH = "./data/bookings.json"
+DATE_RX = re.compile(r"^\d{8}$")
+
+# Chargement initial
+with open(BOOKINGS_PATH, "r", encoding="utf-8") as jsf:
+    bookings = json.load(jsf)["bookings"]
+
+
+def write():
+    with open(BOOKINGS_PATH, "w", encoding="utf-8") as f:
+        json.dump({"bookings": bookings}, f, ensure_ascii=False, indent=2)
+
+
+def validate_date_str(date_str: str) -> bool:
+    if not DATE_RX.match(date_str):
+        return False
+    try:
+        datetime.strptime(date_str, "%Y%m%d")
+        return True
+    except ValueError:
+        return False
+
+
+def require_admin(info):
+    request = info.context["request"]
+    if request.headers.get("X-Admin", "false").lower() != "true":
+        raise GraphQLError("admin only")
+
+
+def get_movie(movie_id: str):
+    try:
+        r = requests.get(
+            "http://localhost:3200/movies",
+            params={"movieid": movie_id},
+            timeout=3,
+        )
+    except requests.RequestException:
+        return None
+
+    if r.status_code != 200:
+        return None
+
+    data = r.json()
+    if isinstance(data, list):
+        if len(data) == 0:
+            return None
+        return data[0]
+    return data
+
+
+def check_schedule(date_str, movie_ids):
+    try:
+        r = requests.get(f"http://localhost:3202/showmovies/{date_str}", timeout=3)
+    except requests.RequestException:
+        raise GraphQLError("schedule service unreachable")
+
+    if r.status_code != 200:
+        raise GraphQLError("date not found in schedule")
+
+    day = r.json()
+    allowed_movies = day.get("movies", [])
+    not_allowed = [m for m in movie_ids if m not in allowed_movies]
+
+    if not_allowed:
+        raise GraphQLError(
+            f"some movies are not scheduled for this date: {not_allowed}"
+        )
+
+
+def find_user_booking(userid: str):
+    for booking in bookings:
+        if booking["userid"] == userid:
+            return booking
+    return None
+
+
+def find_date_entry(user_entry, date_str: str):
+    for date_entry in user_entry["dates"]:
+        if date_entry["date"] == date_str:
+            return date_entry
+    return None
+
+
+# ----- Types Ariadne -----
 
 query = QueryType()
 mutation = MutationType()
 
 
-# --------- QUERIES --------- #
-
-@query.field("allBookings")
-def resolve_all_bookings(_, info):
-    request = info.context["request"]
-    bookings = info.context["bookings"]
-
-    # Admin only (comme GET /bookings avant)
-    if request.headers.get("X-Admin", "false").lower() != "true":
-        raise GraphQLError("admin only")
-
+@query.field("bookings")
+def resolve_bookings(_, info):
+    require_admin(info)
     return bookings
 
 
-@query.field("bookingsByUser")
-def resolve_bookings_by_user(_, info, userid):
-    find_user_booking = info.context["find_user_booking"]
-
+@query.field("booking")
+def resolve_booking(_, info, userid):
     entry = find_user_booking(userid)
     if entry is None:
-        # Comme l'API REST qui renvoyait {userid, dates: []}
         return {"userid": userid, "dates": []}
-
     return entry
 
 
-@query.field("detailedBookingsByUser")
-def resolve_detailed_bookings_by_user(_, info, userid):
-    find_user_booking = info.context["find_user_booking"]
-    get_movie = info.context["get_movie"]
-
+@query.field("bookingDetails")
+def resolve_booking_details(_, info, userid):
     entry = find_user_booking(userid)
     if entry is None:
         return {"userid": userid, "dates": []}
@@ -49,37 +129,20 @@ def resolve_detailed_bookings_by_user(_, info, userid):
             if info_movie:
                 movies_detailed.append(info_movie)
             else:
-                movies_detailed.append({
-                    "id": movie_id,
-                    "error": "movie not found"
-                })
-        detailed_dates.append({
-            "date": d.get("date"),
-            "movies": movies_detailed
-        })
+                movies_detailed.append({"id": movie_id, "error": "movie not found"})
+        detailed_dates.append({"date": d["date"], "movies": movies_detailed})
 
-    return {
-        "userid": userid,
-        "dates": detailed_dates
-    }
+    return {"userid": userid, "dates": detailed_dates}
 
 
 @query.field("statsMoviesForDate")
 def resolve_stats_movies_for_date(_, info, date):
-    request = info.context["request"]
-    bookings = info.context["bookings"]
-    validate_date_str = info.context["validate_date_str"]
-    get_movie = info.context["get_movie"]
-
-    # Admin only (comme l'endpoint REST /stats/date/.../movies)
-    if request.headers.get("X-Admin", "false").lower() != "true":
-        raise GraphQLError("admin only")
+    require_admin(info)
 
     if not validate_date_str(date):
         raise GraphQLError("invalid date format, expected YYYYMMDD")
 
     counts = {}
-
     for booking in bookings:
         for d in booking.get("dates", []):
             if d.get("date") == date:
@@ -90,56 +153,32 @@ def resolve_stats_movies_for_date(_, info, date):
     for movie_id, nb in counts.items():
         info_movie = get_movie(movie_id)
         if info_movie is not None:
-            items.append({
-                "movie": info_movie,
-                "count": nb
-            })
+            movie_obj = info_movie
         else:
-            items.append({
-                "movie": {"id": movie_id, "error": "movie not found"},
-                "count": nb
-            })
+            movie_obj = {"id": movie_id, "error": "movie not found"}
+        items.append({"movie": movie_obj, "count": nb})
 
     items_sorted = sorted(items, key=lambda x: x["count"], reverse=True)
 
-    return {
-        "date": date,
-        "movies": items_sorted
-    }
+    return {"date": date, "movies": items_sorted}
 
-
-# --------- MUTATIONS --------- #
 
 @mutation.field("addBooking")
 def resolve_add_booking(_, info, userid, date, movies):
-    bookings = info.context["bookings"]
-    write = info.context["write"]
-    validate_date_str = info.context["validate_date_str"]
-    check_schedule = info.context["check_schedule"]
-    find_user_booking = info.context["find_user_booking"]
-    find_date_entry = info.context["find_date_entry"]
-
     if not validate_date_str(date):
         raise GraphQLError("invalid date format, expected YYYYMMDD")
 
-    if not isinstance(movies, list) or len(movies) == 0:
-        raise GraphQLError("provide movie or movies as a non-empty array")
+    to_add = [m for m in movies if isinstance(m, str) and m.strip()]
 
-    to_add_movie = []
-    for item in movies:
-        if isinstance(item, str):
-            to_add_movie.append(item)
+    if len(to_add) == 0:
+        raise GraphQLError("provide movie or movies in argument 'movies'")
 
-    if len(to_add_movie) == 0:
-        raise GraphQLError("provide movie or movies as strings")
+    check_schedule(date, to_add)
 
-    result = check_schedule(date, to_add_movie)
-    if result is not True:
-        msg = result.get("error", "schedule error")
-        # On ajoute des détails si disponibles
-        if "not_allowed_movies" in result:
-            msg += f" (not allowed: {', '.join(result['not_allowed_movies'])})"
-        raise GraphQLError(msg)
+    for movie_id in to_add:
+        info_movie = get_movie(movie_id)
+        if info_movie is None:
+            raise GraphQLError(f"movie id '{movie_id}' does not exist in Movie service")
 
     entry = find_user_booking(userid)
     if entry is None:
@@ -151,26 +190,22 @@ def resolve_add_booking(_, info, userid, date, movies):
         dentry = {"date": date, "movies": []}
         entry["dates"].append(dentry)
 
-    for mid in to_add_movie:
-        if mid not in dentry["movies"]:
-            dentry["movies"].append(mid)
+    for movie_id in to_add:
+        if movie_id not in dentry["movies"]:
+            dentry["movies"].append(movie_id)
 
     write()
 
     return {
         "message": "booking added",
+        "userid": userid,
         "date": date,
-        "movies": dentry["movies"]
+        "movies": dentry["movies"],
     }
 
 
 @mutation.field("deleteBooking")
 def resolve_delete_booking(_, info, userid, date, movieid):
-    bookings = info.context["bookings"]
-    write = info.context["write"]
-    find_user_booking = info.context["find_user_booking"]
-    find_date_entry = info.context["find_date_entry"]
-
     entry = find_user_booking(userid)
     if entry is None:
         raise GraphQLError("user has no bookings")
@@ -184,10 +219,7 @@ def resolve_delete_booking(_, info, userid, date, movieid):
     except ValueError:
         raise GraphQLError("movie not booked on this date")
 
-    new_dates = []
-    for d in entry.get("dates", []):
-        if d.get("movies"):
-            new_dates.append(d)
+    new_dates = [d for d in entry["dates"] if len(d.get("movies", [])) > 0]
     entry["dates"] = new_dates
 
     write()
@@ -196,5 +228,9 @@ def resolve_delete_booking(_, info, userid, date, movieid):
         "message": "booking deleted",
         "userid": userid,
         "date": date,
-        "movie": movieid
+        "movie": movieid,
     }
+
+
+type_defs = load_schema_from_path("booking.graphql")
+schema = make_executable_schema(type_defs, [query, mutation])

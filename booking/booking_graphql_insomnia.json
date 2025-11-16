@@ -1,0 +1,137 @@
+{
+  "_type": "export",
+  "__export_format": 4,
+  "__export_source": "",
+  "resources": [
+    {
+      "_id": "wrk_booking_graphql",
+      "_type": "workspace",
+      "name": "Booking GraphQL Service",
+      "parentId": null
+    },
+    {
+      "_id": "env_booking_graphql_base",
+      "_type": "environment",
+      "parentId": "wrk_booking_graphql",
+      "name": "Base Environment",
+      "data": {
+        "base_url": "http://localhost:3201"
+      }
+    },
+    {
+      "_id": "fld_booking_graphql",
+      "_type": "request_group",
+      "parentId": "wrk_booking_graphql",
+      "name": "Booking GraphQL requests"
+    },
+    {
+      "_id": "req_booking_home",
+      "_type": "request",
+      "parentId": "fld_booking_graphql",
+      "name": "GET / (home)",
+      "method": "GET",
+      "url": "{{ _.base_url }}/",
+      "body": {},
+      "headers": [],
+      "parameters": []
+    },
+    {
+      "_id": "req_booking_all_admin",
+      "_type": "request",
+      "parentId": "fld_booking_graphql",
+      "name": "Query - all bookings (admin)",
+      "method": "POST",
+      "url": "{{ _.base_url }}/graphql",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{ \"query\": \"query { bookings { userid dates { date movies } } }\" }"
+      },
+      "headers": [
+        { "name": "Content-Type", "value": "application/json" },
+        { "name": "X-Admin", "value": "true" }
+      ],
+      "parameters": []
+    },
+    {
+      "_id": "req_booking_one_user",
+      "_type": "request",
+      "parentId": "fld_booking_graphql",
+      "name": "Query - booking(userid)",
+      "method": "POST",
+      "url": "{{ _.base_url }}/graphql",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{ \"query\": \"query { booking(userid: \\\"user1\\\") { userid dates { date movies } } }\" }"
+      },
+      "headers": [
+        { "name": "Content-Type", "value": "application/json" }
+      ],
+      "parameters": []
+    },
+    {
+      "_id": "req_booking_details_user",
+      "_type": "request",
+      "parentId": "fld_booking_graphql",
+      "name": "Query - bookingDetails(userid)",
+      "method": "POST",
+      "url": "{{ _.base_url }}/graphql",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{ \"query\": \"query { bookingDetails(userid: \\\"user1\\\") { userid dates { date movies { id title rating director error } } } }\" }"
+      },
+      "headers": [
+        { "name": "Content-Type", "value": "application/json" }
+      ],
+      "parameters": []
+    },
+    {
+      "_id": "req_booking_stats_date",
+      "_type": "request",
+      "parentId": "fld_booking_graphql",
+      "name": "Query - statsMoviesForDate (admin)",
+      "method": "POST",
+      "url": "{{ _.base_url }}/graphql",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{ \"query\": \"query { statsMoviesForDate(date: \\\"20251120\\\") { date movies { count movie { id title rating director error } } } }\" }"
+      },
+      "headers": [
+        { "name": "Content-Type", "value": "application/json" },
+        { "name": "X-Admin", "value": "true" }
+      ],
+      "parameters": []
+    },
+    {
+      "_id": "req_booking_add",
+      "_type": "request",
+      "parentId": "fld_booking_graphql",
+      "name": "Mutation - addBooking",
+      "method": "POST",
+      "url": "{{ _.base_url }}/graphql",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{ \"query\": \"mutation { addBooking(userid: \\\"user1\\\", date: \\\"20251120\\\", movies: [\\\"a8034f44-aee4-44cf-b32c-74cf452aaaae\\\", \\\"720d006c-3a57-4b6a-b18f-9b713b073f3c\\\"]) { message userid date movies } }\" }"
+      },
+      "headers": [
+        { "name": "Content-Type", "value": "application/json" }
+      ],
+      "parameters": []
+    },
+    {
+      "_id": "req_booking_delete",
+      "_type": "request",
+      "parentId": "fld_booking_graphql",
+      "name": "Mutation - deleteBooking",
+      "method": "POST",
+      "url": "{{ _.base_url }}/graphql",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{ \"query\": \"mutation { deleteBooking(userid: \\\"user1\\\", date: \\\"20251120\\\", movieid: \\\"a8034f44-aee4-44cf-b32c-74cf452aaaae\\\") { message userid date movie } }\" }"
+      },
+      "headers": [
+        { "name": "Content-Type", "value": "application/json" }
+      ],
+      "parameters": []
+    }
+  ]
+}

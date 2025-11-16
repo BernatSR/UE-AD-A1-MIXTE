@@ -11,8 +11,8 @@ from ariadne import (
 from graphql import GraphQLError
 
 
-MOVIES_PATH = "./databases/movies.json"
-ACTORS_PATH = "./databases/actors.json"
+MOVIES_PATH = "./data/movies.json"
+ACTORS_PATH = "./data/actors.json"
 
 
 # Helpers JSON 
@@ -204,3 +204,7 @@ def resolve_create_movie(_, info, input):
 
     if not title or not director:
         raise GraphQLError("Missing 'title' or 'director'")
+
+
+type_defs = load_schema_from_path("movie.graphql")
+schema = make_executable_schema(type_defs, [query, mutation])
