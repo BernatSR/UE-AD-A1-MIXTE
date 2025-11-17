@@ -13,26 +13,39 @@ Schéma après modification:
 
 
 Sécurisation des points d'entrées avec la vérification du rôle de l'user comme dans le service booking, movie et user.
-Cas de test Insomnia:
+
 
 
 Note: le service user a été modifié pour passer de la vérificaion de l'admin via le header à une vérification par une route.
 
+Commande pour démarrer les services:
+
+Powershell -> cd movie
+              python movie.py
+
+Démarrer le fichier de test test_schedule.py:
+Nouveau Powershell
+cd schedule
+pyhton test_schedule.py
+
 Cas de test:
 
+Fichier insomnia pour tous les services sauf schedule qui a un fichier de test nommer test_schedule.py
+
+
+-- Faire un scénarioa et choisir les routes à montrer
 
 Organisation du projet:
 
 Bernat a codé + testé le service movie et user et a également mise en place la dockerisation du TP. 
 Johanne a codé + testé les autres services, fait la documentation globale.
 
-Par exemple un point d’entrée dans Booking permettant de récupérer les réservations et le détail du film réservé (d’où les flèches de booking vers Movie).
 
 Si vous avez besoin, vous pouvez ajouter des flèches entre les services.
 
-reste à faire: check curl schedule et si endpoint supp est bien là / 2 dernier endpoints de booking pour addbooking et deletebooking mais d'abord tester schedule
 
 revoir docker-compose et un autre qui met à jour la liste des films programmés pour cette date
+
 
 
 
