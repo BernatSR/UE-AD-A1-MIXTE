@@ -3,6 +3,10 @@ import re
 from datetime import datetime
 
 import requests
+import grpc
+import schedule_pb2
+import schedule_pb2_grpc
+
 from ariadne import (
     QueryType,
     MutationType,
@@ -67,18 +71,24 @@ def get_movie(movie_id: str):
     return payload.get("data", {}).get("movie")
 
 
+# ********** ICI : version gRPC de check_schedule **********
 
 def check_schedule(date_str, movie_ids):
     try:
-        r = requests.get(f"http://localhost:3202/showmovies/{date_str}", timeout=3)
-    except requests.RequestException:
+        with grpc.insecure_channel("localhost:3202") as channel:
+            stub = schedule_pb2_grpc.ScheduleStub(channel)
+            resp = stub.GetScheduleByDate(
+                schedule_pb2.DateRequest(date=date_str)
+            )
+    except grpc.RpcError as e:
+        code = e.code()
+        if code == grpc.StatusCode.INVALID_ARGUMENT:
+            raise GraphQLError("invalid date format, expected YYYYMMDD")
+        if code == grpc.StatusCode.NOT_FOUND:
+            raise GraphQLError("date not found in schedule")
         raise GraphQLError("schedule service unreachable")
 
-    if r.status_code != 200:
-        raise GraphQLError("date not found in schedule")
-
-    day = r.json()
-    allowed_movies = day.get("movies", [])
+    allowed_movies = list(resp.movies)
     not_allowed = [m for m in movie_ids if m not in allowed_movies]
 
     if not_allowed:
@@ -180,8 +190,10 @@ def resolve_add_booking(_, info, userid, date, movies):
     if len(to_add) == 0:
         raise GraphQLError("provide movie or movies in argument 'movies'")
 
+    # Vérification auprès de Schedule (maintenant en gRPC)
     check_schedule(date, to_add)
 
+    # Vérifier que les films existent bien dans Movie
     for movie_id in to_add:
         info_movie = get_movie(movie_id)
         if info_movie is None:

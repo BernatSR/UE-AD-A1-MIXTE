@@ -1,7 +1,7 @@
 from ariadne import graphql_sync
 from flask import Flask, request, jsonify, make_response
 
-import resolvers as r
+import booking.resolvers as r
 
 PORT = 3201
 HOST = "0.0.0.0"
