@@ -34,11 +34,21 @@ def validate_date_format(date: str) -> bool:
 
 
 def get_movie(movie_id: str):
+    query = """
+    query($id: ID!) {
+      movie(id: $id) {
+        id
+        title
+        director
+        rating
+      }
+    }
+    """
     try:
-        r = requests.get(
-            "http://localhost:3200/movies",
-            params={"movieid": movie_id},
-            timeout=3
+        r = requests.post(
+            "http://localhost:3001/graphql", 
+            json={"query": query, "variables": {"id": movie_id}},
+            timeout=3,
         )
     except requests.RequestException:
         return None
@@ -46,12 +56,9 @@ def get_movie(movie_id: str):
     if r.status_code != 200:
         return None
 
-    data = r.json()
-    if isinstance(data, list):
-        if len(data) == 0:
-            return None
-        return data[0]
-    return data
+    payload = r.json()
+    return payload.get("data", {}).get("movie")
+
 
 
 # Implémentation du service gRPC
