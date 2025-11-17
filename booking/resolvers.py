@@ -18,7 +18,7 @@ from graphql import GraphQLError
 BOOKINGS_PATH = "./data/bookings.json"
 DATE_RX = re.compile(r"^\d{8}$")
 
-# Chargement initial
+
 with open(BOOKINGS_PATH, "r", encoding="utf-8") as jsf:
     bookings = json.load(jsf)["bookings"]
 
@@ -71,7 +71,7 @@ def get_movie(movie_id: str):
     return payload.get("data", {}).get("movie")
 
 
-# ********** ICI : version gRPC de check_schedule **********
+# **********  version gRPC de check_schedule **********
 
 def check_schedule(date_str, movie_ids):
     try:
