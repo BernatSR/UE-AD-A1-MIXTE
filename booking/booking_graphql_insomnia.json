@@ -61,7 +61,7 @@
       "url": "{{ _.base_url }}/graphql",
       "body": {
         "mimeType": "application/json",
-        "text": "{ \"query\": \"query { booking(userid: \\\"user1\\\") { userid dates { date movies } } }\" }"
+        "text": "{ \"query\": \"query { booking(userid: \\\"garret_heaton\\\") { userid dates { date movies } } }\" }"
       },
       "headers": [
         { "name": "Content-Type", "value": "application/json" }
@@ -77,7 +77,7 @@
       "url": "{{ _.base_url }}/graphql",
       "body": {
         "mimeType": "application/json",
-        "text": "{ \"query\": \"query { bookingDetails(userid: \\\"user1\\\") { userid dates { date movies { id title rating director error } } } }\" }"
+        "text": "{ \"query\": \"query { bookingDetails(userid: \\\"garret_heaton\\\") { userid dates { date movies { id title rating director } } } }\" }"
       },
       "headers": [
         { "name": "Content-Type", "value": "application/json" }
@@ -93,7 +93,7 @@
       "url": "{{ _.base_url }}/graphql",
       "body": {
         "mimeType": "application/json",
-        "text": "{ \"query\": \"query { statsMoviesForDate(date: \\\"20251120\\\") { date movies { count movie { id title rating director error } } } }\" }"
+        "text": "{ \"query\": \"query { statsMoviesForDate(date: \\\"20151201\\\") { date movies { count movie { id title rating director } } } }\" }"
       },
       "headers": [
         { "name": "Content-Type", "value": "application/json" },
@@ -110,13 +110,14 @@
       "url": "{{ _.base_url }}/graphql",
       "body": {
         "mimeType": "application/json",
-        "text": "{ \"query\": \"mutation { addBooking(userid: \\\"user1\\\", date: \\\"20251120\\\", movies: [\\\"a8034f44-aee4-44cf-b32c-74cf452aaaae\\\", \\\"720d006c-3a57-4b6a-b18f-9b713b073f3c\\\"]) { message userid date movies } }\" }"
+        "text": "{ \"query\": \"mutation { addBooking(userid: \\\"user1\\\", date: \\\"20151130\\\", movies: [\\\"a8034f44-aee4-44cf-b32c-74cf452aaaae\\\", \\\"720d006c-3a57-4b6a-b18f-9b713b073f3c\\\"]) { message userid date movies } }\" }"
       },
       "headers": [
         { "name": "Content-Type", "value": "application/json" }
       ],
       "parameters": []
-    },
+    }
+    ,
     {
       "_id": "req_booking_delete",
       "_type": "request",
@@ -126,7 +127,7 @@
       "url": "{{ _.base_url }}/graphql",
       "body": {
         "mimeType": "application/json",
-        "text": "{ \"query\": \"mutation { deleteBooking(userid: \\\"user1\\\", date: \\\"20251120\\\", movieid: \\\"a8034f44-aee4-44cf-b32c-74cf452aaaae\\\") { message userid date movie } }\" }"
+        "text": "{ \"query\": \"mutation { deleteBooking(userid: \\\"user1\\\", date: \\\"20151130\\\", movieid: \\\"a8034f44-aee4-44cf-b32c-74cf452aaaae\\\") { message userid date movie } }\" }"
       },
       "headers": [
         { "name": "Content-Type", "value": "application/json" }
