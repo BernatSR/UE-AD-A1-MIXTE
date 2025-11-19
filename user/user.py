@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, jsonify, make_response
 import json
+import os
 from datetime import datetime
 import time
 import uuid
@@ -10,13 +11,45 @@ app = Flask(__name__)
 PORT = 3203
 HOST = '0.0.0.0'
 
-# Ouvre fichier json -> charge en dict Python -> extrait la liste d'utilisateurs
-with open('{}/data/users.json'.format("."), "r") as jsf:
-   users = json.load(jsf)["users"]
+USE_MONGO = os.environ.get("USE_MONGO", "false").lower() == "true"
+MONGO_URL = os.environ.get("MONGO_URL", "")
+MONGO_DB_NAME = os.environ.get("MONGO_DB_NAME", "appdb")
+_mongo_db = None
+if USE_MONGO:
+    try:
+        from pymongo import MongoClient
+        _mongo_db = MongoClient(MONGO_URL)[MONGO_DB_NAME]
+    except Exception:
+        _mongo_db = None
+
+USERS_PATH = '{}/data/users.json'.format(".")
+
+def _load_users_from_json():
+    with open(USERS_PATH, "r") as jsf:
+        return json.load(jsf)["users"]
+
+def _save_users_to_json(users):
+    with open(USERS_PATH, 'w') as f:
+        json.dump({"users": users}, f, ensure_ascii=False, indent=2)
+
+if USE_MONGO and _mongo_db is not None:
+    try:
+        users = list(_mongo_db.users.find({}, {"_id": 0}))
+    except Exception:
+        users = []
+else:
+    users = _load_users_from_json()
 
 def write(users):
-    with open('{}/data/users.json'.format("."), 'w') as f:
-        json.dump({"users": users}, f, ensure_ascii=False, indent=2)
+    if USE_MONGO and _mongo_db is not None:
+        try:
+            _mongo_db.users.delete_many({})
+            if users:
+                _mongo_db.users.insert_many([u.copy() for u in users])
+            return
+        except Exception:
+            pass
+    _save_users_to_json(users)
 
 def name_to_id(name: str):
     return name.strip().lower().replace(" ", "_")
@@ -40,7 +73,7 @@ def is_admin(userid):
 
 @app.route("/", methods=['GET'])
 def profil():
-   return "<h1 style='color:blue'>Welcome to the User service!</h1>"
+   return "<h1 style='color:blue'> "+ str(USE_MONGO) +" Welcome to the User service!</h1>"
 
 #CRUD user
 
@@ -57,7 +90,7 @@ def add_user():
     user_id = req["name"].strip().lower().replace(" ", "_")
     req["id"] = user_id
     req["last_active"] = int(time.time())
-    req["is_admin"] = False
+    req["is_admin"] = True
 
     for user in users:
         if user["id"] == user_id:

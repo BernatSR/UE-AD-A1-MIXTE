@@ -1,11 +1,14 @@
 import json
 import re
+import os
 from datetime import datetime
+from typing import List, Dict
 
 import requests
 import grpc
-import schedule_pb2
-import schedule_pb2_grpc
+
+from schedule import schedule_pb2
+from schedule import schedule_pb2_grpc
 
 from ariadne import (
     QueryType,
@@ -16,14 +19,38 @@ from ariadne import (
 from graphql import GraphQLError
 
 BOOKINGS_PATH = "./data/bookings.json"
+USE_MONGO = os.environ.get("USE_MONGO", "false").lower() == "true"
+MONGO_URL = os.environ.get("MONGO_URL", "")
+MONGO_DB_NAME = os.environ.get("MONGO_DB_NAME", "appdb")
+_mongo_db = None
+if USE_MONGO:
+    try:
+        from pymongo import MongoClient
+        _mongo_db = MongoClient(MONGO_URL)[MONGO_DB_NAME]
+    except Exception:
+        _mongo_db = None
 DATE_RX = re.compile(r"^\d{8}$")
 
 
-with open(BOOKINGS_PATH, "r", encoding="utf-8") as jsf:
-    bookings = json.load(jsf)["bookings"]
+if USE_MONGO and _mongo_db is not None:
+    try:
+        bookings: List[Dict] = list(_mongo_db.bookings.find({}, {"_id": 0}))
+    except Exception:
+        bookings = []
+else:
+    with open(BOOKINGS_PATH, "r", encoding="utf-8") as jsf:
+        bookings = json.load(jsf)["bookings"]
 
 
 def write():
+    if USE_MONGO and _mongo_db is not None:
+        try:
+            _mongo_db.bookings.delete_many({})
+            if bookings:
+                _mongo_db.bookings.insert_many([b.copy() for b in bookings])
+            return
+        except Exception:
+            pass
     with open(BOOKINGS_PATH, "w", encoding="utf-8") as f:
         json.dump({"bookings": bookings}, f, ensure_ascii=False, indent=2)
 
@@ -57,7 +84,7 @@ def get_movie(movie_id: str):
     """
     try:
         r = requests.post(
-            "http://localhost:3001/graphql",
+            os.environ.get("MOVIE_URL", "http://localhost:3001/graphql"),
             json={"query": query, "variables": {"id": movie_id}},
             timeout=3,
         )
@@ -75,7 +102,7 @@ def get_movie(movie_id: str):
 
 def check_schedule(date_str, movie_ids):
     try:
-        with grpc.insecure_channel("localhost:3202") as channel:
+        with grpc.insecure_channel(os.environ.get("SCHEDULE_ADDR", "localhost:3202")) as channel:
             stub = schedule_pb2_grpc.ScheduleStub(channel)
             resp = stub.GetScheduleByDate(
                 schedule_pb2.DateRequest(date=date_str)

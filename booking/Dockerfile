@@ -1,6 +1,14 @@
-FROM python:3.8-alpine
+FROM python:3.11-slim
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+	PYTHONUNBUFFERED=1
+
 WORKDIR /app
-COPY requirements.txt /app
-RUN pip install -r requirements.txt
-ADD . /app/
+
+COPY requirements.txt /app/
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY . /app/
+
+EXPOSE 3201
 CMD ["python","-u","booking.py"]

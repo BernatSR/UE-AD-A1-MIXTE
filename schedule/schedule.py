@@ -1,6 +1,7 @@
 import json
 import os
 import requests
+from typing import List, Dict
 from concurrent import futures
 
 import grpc
@@ -12,9 +13,25 @@ import schedule_pb2_grpc
 PORT = 3202
 DATABASE_PATH = "./data/times.json"
 
+USE_MONGO = os.environ.get("USE_MONGO", "false").lower() == "true"
+MONGO_URL = os.environ.get("MONGO_URL", "")
+MONGO_DB_NAME = os.environ.get("MONGO_DB_NAME", "appdb")
+_mongo_db = None
+if USE_MONGO:
+    try:
+        from pymongo import MongoClient
+        _mongo_db = MongoClient(MONGO_URL)[MONGO_DB_NAME]
+    except Exception:
+        _mongo_db = None
 
 
-def load_schedule():
+
+def load_schedule() -> List[Dict]:
+    if USE_MONGO and _mongo_db is not None:
+        try:
+            return list(_mongo_db.schedule.find({}, {"_id": 0}))
+        except Exception:
+            return []
     try:
         with open(DATABASE_PATH, "r", encoding="utf-8") as jsf:
             return json.load(jsf)["schedule"]
@@ -22,7 +39,15 @@ def load_schedule():
         return []
 
 
-def save_schedule(schedule_data):
+def save_schedule(schedule_data: List[Dict]):
+    if USE_MONGO and _mongo_db is not None:
+        try:
+            _mongo_db.schedule.delete_many({})
+            if schedule_data:
+                _mongo_db.schedule.insert_many([s.copy() for s in schedule_data])
+            return
+        except Exception:
+            pass
     os.makedirs(os.path.dirname(DATABASE_PATH), exist_ok=True)
     data = {"schedule": schedule_data}
     with open(DATABASE_PATH, "w", encoding="utf-8") as jsf:
@@ -46,7 +71,7 @@ def get_movie(movie_id: str):
     """
     try:
         r = requests.post(
-            "http://localhost:3001/graphql", 
+            os.environ.get("MOVIE_URL", "http://localhost:3001/graphql"),
             json={"query": query, "variables": {"id": movie_id}},
             timeout=3,
         )

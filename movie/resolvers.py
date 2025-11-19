@@ -1,5 +1,7 @@
 import json
 import uuid
+import os
+from typing import List, Dict
 
 from ariadne import (
     QueryType,
@@ -13,25 +15,62 @@ from graphql import GraphQLError
 MOVIES_PATH = "./data/movies.json"
 ACTORS_PATH = "./data/actors.json"
 
+USE_MONGO = os.environ.get("USE_MONGO", "false").lower() == "true"
+MONGO_URL = os.environ.get("MONGO_URL", "")
+MONGO_DB_NAME = os.environ.get("MONGO_DB_NAME", "appdb")
+_mongo_db = None
+if USE_MONGO:
+    try:
+        from pymongo import MongoClient
+        _mongo_db = MongoClient(MONGO_URL)[MONGO_DB_NAME]
+    except Exception:
+        _mongo_db = None
+
 
 # ---------- Helpers JSON ----------
 
-def load_movies():
+def load_movies() -> List[Dict]:
+    if USE_MONGO and _mongo_db is not None:
+        try:
+            return list(_mongo_db.movies.find({}, {"_id": 0}))
+        except Exception:
+            return []
     with open(MOVIES_PATH, "r", encoding="utf-8") as f:
         return json.load(f)["movies"]
 
 
-def save_movies(movies):
+def save_movies(movies: List[Dict]):
+    if USE_MONGO and _mongo_db is not None:
+        try:
+            _mongo_db.movies.delete_many({})
+            if movies:
+                _mongo_db.movies.insert_many([m.copy() for m in movies])
+            return
+        except Exception:
+            pass
     with open(MOVIES_PATH, "w", encoding="utf-8") as f:
         json.dump({"movies": movies}, f, ensure_ascii=False, indent=2)
 
 
-def load_actors():
+def load_actors() -> List[Dict]:
+    if USE_MONGO and _mongo_db is not None:
+        try:
+            return list(_mongo_db.actors.find({}, {"_id": 0}))
+        except Exception:
+            return []
     with open(ACTORS_PATH, "r", encoding="utf-8") as f:
         return json.load(f)["actors"]
 
 
-def save_actors(actors):
+def save_actors(actors: List[Dict]):
+    if USE_MONGO and _mongo_db is not None:
+        try:
+            _mongo_db.actors.delete_many({})
+            if actors:
+                _mongo_db.actors.insert_many([a.copy() for a in actors])
+            return
+        except Exception:
+            pass
     with open(ACTORS_PATH, "w", encoding="utf-8") as f:
         json.dump({"actors": actors}, f, ensure_ascii=False, indent=2)
 

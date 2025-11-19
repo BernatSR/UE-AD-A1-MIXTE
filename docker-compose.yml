@@ -1,7 +1,84 @@
 services:
-  movie:
-    build: ./movie/
+  mongo:
+    image: mongo:7
+    restart: always
     ports:
-      - "3200:3200"
-  # to continue
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+    volumes:
+      - mongo_data:/data/db
+
+  mongo-express:
+    image: mongo-express:1
+    restart: always
+    ports:
+      - "8081:8081"
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: root
+      ME_CONFIG_MONGODB_ADMINPASSWORD: example
+      ME_CONFIG_MONGODB_URL: mongodb://root:example@mongo:27017/?authSource=admin
+      ME_CONFIG_BASICAUTH: "false"
+
+  movie:
+    build: ./movie
+    ports:
+      - "3001:3001"
+    volumes:
+      - ./movie/data:/app/data:rw
+    restart: unless-stopped
+    environment:
+      - USE_MONGO=${USE_MONGO:-false}
+      - MONGO_URL=${MONGO_URL:-mongodb://root:example@mongo:27017/?authSource=admin}
+      - MONGO_DB_NAME=${MONGO_DB_NAME:-appdb}
+
+  schedule:
+    build: ./schedule
+    ports:
+      - "3202:3202"
+    environment:
+      - MOVIE_URL=http://movie:3001/graphql
+      - USE_MONGO=${USE_MONGO:-false}
+      - MONGO_URL=${MONGO_URL:-mongodb://root:example@mongo:27017/?authSource=admin}
+      - MONGO_DB_NAME=${MONGO_DB_NAME:-appdb}
+    depends_on:
+      - movie
+      - mongo
+    volumes:
+      - ./schedule/data:/app/data:rw
+    restart: unless-stopped
+
+  booking:
+    build: ./booking
+    ports:
+      - "3201:3201"
+    environment:
+      - MOVIE_URL=http://movie:3001/graphql
+      - SCHEDULE_ADDR=schedule:3202
+      - USE_MONGO=${USE_MONGO:-false}
+      - MONGO_URL=${MONGO_URL:-mongodb://root:example@mongo:27017/?authSource=admin}
+      - MONGO_DB_NAME=${MONGO_DB_NAME:-appdb}
+    depends_on:
+      - movie
+      - schedule
+      - mongo
+    volumes:
+      - ./booking/data:/app/data:rw
+    restart: unless-stopped
+
+  user:
+    build: ./user
+    ports:
+      - "3203:3203"
+    volumes:
+      - ./user/data:/app/data:rw
+    restart: unless-stopped
+    environment:
+      - USE_MONGO=${USE_MONGO:-false}
+      - MONGO_URL=${MONGO_URL:-mongodb://root:example@mongo:27017/?authSource=admin}
+      - MONGO_DB_NAME=${MONGO_DB_NAME:-appdb}
+
+volumes:
+  mongo_data:
 

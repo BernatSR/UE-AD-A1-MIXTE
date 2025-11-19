@@ -1,19 +1,14 @@
-FROM python
-# can you find a lighter image?
+FROM python:3.11-slim
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+	PYTHONUNBUFFERED=1
 
 WORKDIR /app
 
-# copy the requirements file in the workdir
-RUN
+COPY requirements.txt /app/
+RUN pip install --no-cache-dir -r requirements.txt
 
-# install the Python requirements
-RUN
+COPY . /app/
 
-# grpc compilation of proto files or copy of generated files
-RUN
-
-# copy the app files and directories
-RUN
-
-# start movie.py when the container is started
-CMD 
+EXPOSE 3202
+CMD ["python","-u","schedule.py"]
