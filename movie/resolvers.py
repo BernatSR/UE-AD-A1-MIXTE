@@ -235,22 +235,22 @@ def resolve_movies(_, id=None, title=None, director=None):
 
 
 @query.field("movie")
-def resolve_movie(_, id):
+def resolve_movie(_,info,  id):
     return get_movie_by_id(id)
 
 
 @query.field("actors")
-def resolve_actors(_):
+def resolve_actors(_, info):
     return get_all_actors()
 
 
 @query.field("actor")
-def resolve_actor(_, id):
+def resolve_actor(_, info, id):
     return get_actor_by_id(id)
 
 
 @query.field("moviesByActor")
-def resolve_movies_by_actor(_, actorId):
+def resolve_movies_by_actor(_,info,  actorId):
     actor = get_actor_by_id(actorId)
     if actor is None:
         return []
@@ -258,12 +258,12 @@ def resolve_movies_by_actor(_, actorId):
 
 
 @query.field("actorsByMovie")
-def resolve_actors_by_movie(_, movieId):
+def resolve_actors_by_movie(_,info,  movieId):
     return get_actors_for_movie(movieId)
 
 
 @query.field("topRatedMovies")
-def resolve_top_rated_movies(_, limit_film):
+def resolve_top_rated_movies(_,info,  limit_film):
     movies = load_movies()
     movies_sorted = sorted(
         movies,
@@ -284,7 +284,7 @@ def resolve_top_rated_movies(_, limit_film):
 
 #demande movie pour avoir un champs + haut
 @movie_type.field("actors")
-def resolve_movie_actors(movie):
+def resolve_movie_actors(movie, info):
     movie_id = movie.get("id")
     if not movie_id:
         return []
@@ -295,7 +295,7 @@ def resolve_movie_actors(movie):
 
 
 @actor_type.field("films")
-def resolve_actor_films(actor):
+def resolve_actor_films(actor, info):
     movies = get_movies_for_actor(actor)
     if movies is None:
         return []

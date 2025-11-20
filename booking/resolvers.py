@@ -175,7 +175,7 @@ def resolve_booking(_, info, userid):
 
 
 @query.field("bookingDetails")
-def resolve_booking_details(_, userid):
+def resolve_booking_details(_, info, userid):
     entry = find_user_booking(userid)
     if entry is None:
         return {"userid": userid, "dates": []}
@@ -226,7 +226,7 @@ def resolve_stats_movies_for_date(_, info, date):
 
 
 @mutation.field("addBooking")
-def resolve_add_booking(_, userid, date, movies):
+def resolve_add_booking(_, info, userid, date, movies):
     if not validate_date_str(date):
         raise GraphQLError("invalid date format, expected YYYYMMDD")
 
@@ -270,7 +270,7 @@ def resolve_add_booking(_, userid, date, movies):
 
 
 @mutation.field("deleteBooking")
-def resolve_delete_booking(_, userid, date, movieid):
+def resolve_delete_booking(_, info, userid, date, movieid):
     entry = find_user_booking(userid)
     if entry is None:
         raise GraphQLError("user has no bookings")
