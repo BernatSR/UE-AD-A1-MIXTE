@@ -230,7 +230,7 @@ def movie_already_exists(title, director):
 # ---------- Query resolvers ----------
 
 @query.field("movies")
-def resolve_movies(_, id=None, title=None, director=None):
+def resolve_movies(_, info,id=None, title=None, director=None):
     return filter_movies(movie_id=id, title=title, director=director)
 
 
