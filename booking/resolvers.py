@@ -83,6 +83,7 @@ def require_admin(info):
 
 
 def get_movie(movie_id: str):
+    #appel resolver de movie avec la requete nommée query($id: ID!)
     query = """
     query($id: ID!) {
       movie(id: $id) {
@@ -95,6 +96,7 @@ def get_movie(movie_id: str):
     """
     try:
         r = requests.post(
+            #MOVIE_URL permet de connaitre la localisation du conteneur
             os.environ.get("MOVIE_URL", "http://localhost:3001/graphql"),
             json={"query": query, "variables": {"id": movie_id}},
             timeout=3,
@@ -106,6 +108,7 @@ def get_movie(movie_id: str):
         return None
 
     payload = r.json()
+    #tjrs data{movie{id,..}}
     return payload.get("data", {}).get("movie")
 
 
@@ -113,8 +116,10 @@ def get_movie(movie_id: str):
 
 def check_schedule(date_str, movie_ids):
     try:
+        #connexion service schedule
         with grpc.insecure_channel(os.environ.get("SCHEDULE_ADDR", "localhost:3202")) as channel:
             stub = schedule_pb2_grpc.ScheduleStub(channel)
+            #requete au service schedule
             resp = stub.GetScheduleByDate(
                 schedule_pb2.DateRequest(date=date_str)
             )
@@ -149,12 +154,12 @@ def find_date_entry(user_entry, date_str: str):
     return None
 
 
-# ----- Types Ariadne -----
+# ----- Types Ariadne : connecter chaque champ à un resolver, zcrire schema graphql -----
 
 query = QueryType()
 mutation = MutationType()
 
-
+#injecte info.context → infos de la requête GraphQL
 @query.field("bookings")
 def resolve_bookings(_, info):
     require_admin(info)
@@ -170,7 +175,7 @@ def resolve_booking(_, info, userid):
 
 
 @query.field("bookingDetails")
-def resolve_booking_details(_, info, userid):
+def resolve_booking_details(_, userid):
     entry = find_user_booking(userid)
     if entry is None:
         return {"userid": userid, "dates": []}
@@ -189,7 +194,7 @@ def resolve_booking_details(_, info, userid):
 
     return {"userid": userid, "dates": detailed_dates}
 
-
+#Présentation Bernat
 @query.field("statsMoviesForDate")
 def resolve_stats_movies_for_date(_, info, date):
     require_admin(info)
@@ -197,6 +202,7 @@ def resolve_stats_movies_for_date(_, info, date):
     if not validate_date_str(date):
         raise GraphQLError("invalid date format, expected YYYYMMDD")
 
+    #récupère film à la bonne date
     counts = {}
     for booking in bookings:
         for d in booking.get("dates", []):
@@ -204,6 +210,7 @@ def resolve_stats_movies_for_date(_, info, date):
                 for movie_id in d.get("movies", []):
                     counts[movie_id] = counts.get(movie_id, 0) + 1
 
+    # récupère info chaque films à la bonne date
     items = []
     for movie_id, nb in counts.items():
         info_movie = get_movie(movie_id)
@@ -219,16 +226,17 @@ def resolve_stats_movies_for_date(_, info, date):
 
 
 @mutation.field("addBooking")
-def resolve_add_booking(_, info, userid, date, movies):
+def resolve_add_booking(_, userid, date, movies):
     if not validate_date_str(date):
         raise GraphQLError("invalid date format, expected YYYYMMDD")
 
+    #garder uniquement les strings non vides
     to_add = [m for m in movies if isinstance(m, str) and m.strip()]
 
     if len(to_add) == 0:
         raise GraphQLError("provide movie or movies in argument 'movies'")
 
-    # Vérification auprès de Schedule (maintenant en gRPC)
+    # Vérification auprès du service Schedule
     check_schedule(date, to_add)
 
     # Vérifier que les films existent bien dans Movie
@@ -262,7 +270,7 @@ def resolve_add_booking(_, info, userid, date, movies):
 
 
 @mutation.field("deleteBooking")
-def resolve_delete_booking(_, info, userid, date, movieid):
+def resolve_delete_booking(_, userid, date, movieid):
     entry = find_user_booking(userid)
     if entry is None:
         raise GraphQLError("user has no bookings")
@@ -276,6 +284,7 @@ def resolve_delete_booking(_, info, userid, date, movieid):
     except ValueError:
         raise GraphQLError("movie not booked on this date")
 
+    # On garde seulement les dates où il reste au moins un film dans la liste movies
     new_dates = [d for d in entry["dates"] if len(d.get("movies", [])) > 0]
     entry["dates"] = new_dates
 

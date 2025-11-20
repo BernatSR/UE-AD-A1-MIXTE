@@ -151,7 +151,7 @@ def delete_movie(movie_id):
             return m
     return None
 
-
+# Savoir si un film est utilisé par au moins un acteur
 def is_movie_referenced(movie_id):
     actors = load_actors()
     return any(movie_id in a.get("films", []) for a in actors)
@@ -181,7 +181,9 @@ def get_movies_for_actor(actor):
     if not movie_ids:
         return []
     movies = load_movies()
+    # construction d'un dict pour opti la recherche
     movie_map = {m["id"]: m for m in movies}
+    # renvoyer film correspondant à l'id
     return [movie_map[mid] for mid in movie_ids if mid in movie_map]
 
 
@@ -215,6 +217,7 @@ def movie_already_exists(title, director):
     d = director.strip().lower()
     for m in movies:
         if (
+            # vérifie si le film existe
             str(m.get("title", "")).strip().lower() == t
             and str(m.get("director", "")).strip().lower() == d
         ):
@@ -226,27 +229,27 @@ def movie_already_exists(title, director):
 # ---------- Query resolvers ----------
 
 @query.field("movies")
-def resolve_movies(_, info, id=None, title=None, director=None):
+def resolve_movies(_, id=None, title=None, director=None):
     return filter_movies(movie_id=id, title=title, director=director)
 
 
 @query.field("movie")
-def resolve_movie(_, info, id):
+def resolve_movie(_, id):
     return get_movie_by_id(id)
 
 
 @query.field("actors")
-def resolve_actors(_, info):
+def resolve_actors(_):
     return get_all_actors()
 
 
 @query.field("actor")
-def resolve_actor(_, info, id):
+def resolve_actor(_, id):
     return get_actor_by_id(id)
 
 
 @query.field("moviesByActor")
-def resolve_movies_by_actor(_, info, actorId):
+def resolve_movies_by_actor(_, actorId):
     actor = get_actor_by_id(actorId)
     if actor is None:
         return []
@@ -254,20 +257,21 @@ def resolve_movies_by_actor(_, info, actorId):
 
 
 @query.field("actorsByMovie")
-def resolve_actors_by_movie(_, info, movieId):
+def resolve_actors_by_movie(_, movieId):
     return get_actors_for_movie(movieId)
 
 
 @query.field("topRatedMovies")
-def resolve_top_rated_movies(_, info, limit):
+def resolve_top_rated_movies(_, limit_film):
     movies = load_movies()
     movies_sorted = sorted(
         movies,
         key=lambda m: m.get("rating", 0.0),
         reverse=True,
     )
+    #permet de retourner les x 1er films
     try:
-        n = int(limit)
+        n = int(limit_film)
     except (TypeError, ValueError):
         n = 0
     if n <= 0:
@@ -277,8 +281,9 @@ def resolve_top_rated_movies(_, info, limit):
 
 # ---------- Field resolvers ----------
 
+#demande movie pour avoir un champs + haut
 @movie_type.field("actors")
-def resolve_movie_actors(movie, info):
+def resolve_movie_actors(movie):
     movie_id = movie.get("id")
     if not movie_id:
         return []
@@ -289,7 +294,7 @@ def resolve_movie_actors(movie, info):
 
 
 @actor_type.field("films")
-def resolve_actor_films(actor, info):
+def resolve_actor_films(actor):
     movies = get_movies_for_actor(actor)
     if movies is None:
         return []
@@ -420,6 +425,8 @@ def resolve_create_actor(_, info, id, firstname, lastname, birthyear, films):
     if any(a["id"] == id for a in actors):
         raise GraphQLError("actor ID already exists")
 
+    #any= au moins un
+    #vérifie que chaque film associé à l’acteur existe réellement
     for film_id in films:
         if not any(m["id"] == film_id for m in movies):
             raise GraphQLError(f"movie '{film_id}' does not exist")
@@ -443,6 +450,7 @@ def resolve_delete_actor(_, info, id):
 
     actors = load_actors()
 
+    # recherche le 1er acteur dans la liste dont l’ID == id
     actor = next((a for a in actors if a["id"] == id), None)
     if actor is None:
         raise GraphQLError("actor ID not found")

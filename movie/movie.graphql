@@ -1,3 +1,12 @@
+# Rappel sur la signification du "!"
+# Type            valeur facultative
+# Type!           valeur obligatoire (non null)
+# [Type]          liste facultative / éléments facultatifs
+# [Type]!         liste obligatoire / éléments facultatifs
+# [Type!]         liste facultative / éléments obligatoires
+# [Type!]!        liste obligatoire / éléments obligatoires
+
+
 type Movie {
   id: ID!
   title: String!
@@ -46,7 +55,7 @@ type Mutation {
   deleteMovieSafe(id: ID!): Movie!
 
   addFilmToActor(actorId: ID!, movieId: ID!): Actor!
-  removeFilmFromActor(actorId: ID!, movieId: ID!): Actor!
+  removeFilmFromActor(actorId: ID!, movieId: ID!): Actor! 
 
   createActor(
     id: ID!

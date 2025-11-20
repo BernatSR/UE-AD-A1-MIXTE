@@ -93,10 +93,13 @@ class ScheduleServicer(schedule_pb2_grpc.ScheduleServicer):
         self.schedule = load_schedule()
 
     # GET /showmovies
-    def GetAllSchedules(self, request, context):
+    def GetAllSchedules(self):
+        #transforme chaque entrée du JSON en objet protobuf
         entries = [
             schedule_pb2.ScheduleEntry(
+                #obligatoire
                 date=e["date"],
+                #optionnel avec get
                 movies=e.get("movies", [])
             )
             for e in self.schedule
@@ -105,6 +108,7 @@ class ScheduleServicer(schedule_pb2_grpc.ScheduleServicer):
 
     # GET /showmovies/<date>
     def GetScheduleByDate(self, request, context):
+        # récupération de la date depuis la requête
         date = request.date
 
         if not validate_date_format(date):
@@ -114,9 +118,9 @@ class ScheduleServicer(schedule_pb2_grpc.ScheduleServicer):
             )
 
         for e in self.schedule:
-            if e.get("date") == date:
+            if e.get("date") == date: #optionnel
                 return schedule_pb2.ScheduleEntry(
-                    date=e["date"],
+                    date=e["date"], #obligatoire
                     movies=e.get("movies", [])
                 )
 
@@ -197,6 +201,8 @@ class ScheduleServicer(schedule_pb2_grpc.ScheduleServicer):
 
         for i, e in enumerate(self.schedule):
             if e.get("date") == date:
+                #self.schedule= 
+                #MAJ des films de cette date
                 self.schedule[i]["movies"] = movies
                 try:
                     save_schedule(self.schedule)
@@ -252,6 +258,7 @@ class ScheduleServicer(schedule_pb2_grpc.ScheduleServicer):
             f"Schedule not found for date: {date}"
         )
 
+    # Présentation Johanne
     # GET /showmovies/<date>/best-rated
     def GetBestRatedMovie(self, request, context):
         date = request.date
@@ -263,9 +270,9 @@ class ScheduleServicer(schedule_pb2_grpc.ScheduleServicer):
             )
 
         day_entry = None
-        for e in self.schedule:
+        for e in self.schedule:#self.schedule= liste chargé avec tout le json times
             if e.get("date") == date:
-                day_entry = e
+                day_entry = e #stocke l'entrée avec date et movie
                 break
 
         if day_entry is None:
