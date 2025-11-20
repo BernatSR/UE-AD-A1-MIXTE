@@ -9,6 +9,7 @@ Schéma de base:
 
 Schéma après modification:
 
+<img width="504" height="669" alt="image" src="https://github.com/user-attachments/assets/816b0b6f-d3d4-48bd-81cb-6a38f6050456" />
 
 
 
