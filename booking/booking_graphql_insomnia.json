@@ -48,7 +48,7 @@
       },
       "headers": [
         { "name": "Content-Type", "value": "application/json" },
-        { "name": "X-User-Id", "value": "admin" }
+        { "name": "X-User-Id", "value": "chris_rivers" }
       ],
       "parameters": []
     },
@@ -97,7 +97,7 @@
       },
       "headers": [
         { "name": "Content-Type", "value": "application/json" },
-        { "name": "X-User-Id", "value": "admin" }
+        { "name": "X-User-Id", "value": "chris_rivers" }
       ],
       "parameters": []
     },
