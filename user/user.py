@@ -70,6 +70,7 @@ def is_admin(userid):
 
 
 #Route
+# objet -> utiliser array
 
 @app.route("/", methods=['GET'])
 def profil():
@@ -98,7 +99,8 @@ def add_user():
 
     users.append(req)
     write(users)
-
+    
+    #jsonify qui permet de créer une réponse HTTP à partir d’un format JSON
     return make_response(jsonify({
         "message": "user added",
         "user": req
@@ -126,7 +128,7 @@ def get_all_users():
 
 @app.route("/users/<userid>", methods=['GET'])
 def get_user(userid):
-    """Renvoie un utilisateur précis selon son ID."""
+    """Renvoie un utilisateur précis selon son ID"""
     for user in users:
         if str(user["id"]) == str(userid):
             return make_response(jsonify(user), 200)

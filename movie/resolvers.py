@@ -191,6 +191,7 @@ def get_movies_for_actor(actor):
 
 query = QueryType()
 mutation = MutationType()
+#attacher notre resolver à la liste des acteurs à construire dans le type Movie du schéma
 movie_type = ObjectType("Movie")
 actor_type = ObjectType("Actor")
 
@@ -303,6 +304,7 @@ def resolve_actor_films(actor):
 
 # ---------- Mutations ----------
 
+#il n’y a pas de field parent, car ce resolver est appelé directement depuis la requête (objet racine _)
 @mutation.field("createMovie")
 def resolve_create_movie(_, info, input):
     require_admin(info)

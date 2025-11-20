@@ -154,7 +154,7 @@ def find_date_entry(user_entry, date_str: str):
     return None
 
 
-# ----- Types Ariadne : connecter chaque champ à un resolver, zcrire schema graphql -----
+# ----- Types Ariadne : s’occupe de faire la correspondance entre le format json du film retourné et les attributs du type Movie déclaré dans le schéma -----
 
 query = QueryType()
 mutation = MutationType()

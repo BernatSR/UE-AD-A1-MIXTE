@@ -21,6 +21,7 @@ _runtime_version.ValidateProtobufRuntimeVersion(
 
 _sym_db = _symbol_database.Default()
 
+# ce fichier contient le code relatif aux types de messages et le serializer et deserializer des informations
 
 from google.protobuf import empty_pb2 as google_dot_protobuf_dot_empty__pb2
 

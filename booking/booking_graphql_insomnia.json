@@ -48,7 +48,7 @@
       },
       "headers": [
         { "name": "Content-Type", "value": "application/json" },
-        { "name": "X-Admin", "value": "true" }
+        { "name": "X-User-Id", "value": "admin" }
       ],
       "parameters": []
     },
@@ -97,7 +97,7 @@
       },
       "headers": [
         { "name": "Content-Type", "value": "application/json" },
-        { "name": "X-Admin", "value": "true" }
+        { "name": "X-User-Id", "value": "admin" }
       ],
       "parameters": []
     },
@@ -116,8 +116,7 @@
         { "name": "Content-Type", "value": "application/json" }
       ],
       "parameters": []
-    }
-    ,
+    },
     {
       "_id": "req_booking_delete",
       "_type": "request",

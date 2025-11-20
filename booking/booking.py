@@ -16,7 +16,7 @@ def home():
         "<h1 style='color:blue'>Welcome to the Booking service!</h1>", 200
     )
 
-
+#unique point d’entrée utilisant POST
 @app.route("/graphql", methods=["POST"])
 def graphql_server():
     data = request.get_json()

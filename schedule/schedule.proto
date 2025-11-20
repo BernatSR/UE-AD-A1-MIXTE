@@ -4,6 +4,12 @@ package schedule;
 
 import "google/protobuf/empty.proto";
 
+
+// yield sert uniquement si ton RPC est en streaming
+// ex: rpc GetAllSchedulesStream(Empty) returns (stream ScheduleEntry);
+// on utilise yield parce que le serveur envoie plusieurs messages au client
+
+
 service Schedule {
   rpc GetAllSchedules(google.protobuf.Empty) returns (ListSchedulesResponse);
   rpc GetScheduleByDate(DateRequest) returns (ScheduleEntry);

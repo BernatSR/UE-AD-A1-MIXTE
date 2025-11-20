@@ -335,6 +335,7 @@ class ScheduleServicer(schedule_pb2_grpc.ScheduleServicer):
 def serve():
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
     schedule_pb2_grpc.add_ScheduleServicer_to_server(ScheduleServicer(), server)
+    #une connexion avec l’hôte et utilisons ce channel pour créer le stub
     server.add_insecure_port(f"[::]:{PORT}")
     server.start()
     print(f"gRPC Schedule server running on port {PORT}")

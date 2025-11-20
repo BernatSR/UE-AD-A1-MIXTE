@@ -10,6 +10,14 @@ GRPC_GENERATED_VERSION = '1.76.0'
 GRPC_VERSION = grpc.__version__
 _version_not_supported = False
 
+#ce fichier contient les éléments relatifs aux stub du client et du serveur
+# Avec gRPC le stub du client est appelé le stub alors que le stub du serveur est appelé le servicer
+
+#Pour chaque méthode/procédure du service précisé dans le fichier proto initial, un attribut portant le même nom est 
+#ajouté à l’objet MovieStub. Ce sont ces attributs que notre client devra appeler pour effectuer des appels distants au service. 
+#L’attribut créé une connexion avec le serveur en utilisant l’input channel (4 types possibles unary_unary, unary_stream, 
+#stream_unary et stream_stream).
+
 try:
     from grpc._utilities import first_version_is_lower
     _version_not_supported = first_version_is_lower(GRPC_VERSION, GRPC_GENERATED_VERSION)
@@ -28,7 +36,7 @@ if _version_not_supported:
 
 class ScheduleStub(object):
     """Missing associated documentation comment in .proto file."""
-
+    #créer ses connexions avec le serveur
     def __init__(self, channel):
         """Constructor.
 
