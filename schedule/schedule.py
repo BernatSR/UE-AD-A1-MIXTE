@@ -93,7 +93,7 @@ class ScheduleServicer(schedule_pb2_grpc.ScheduleServicer):
         self.schedule = load_schedule()
 
     # GET /showmovies
-    def GetAllSchedules(self):
+    def GetAllSchedules(self, request, context):
         #transforme chaque entrée du JSON en objet protobuf
         entries = [
             schedule_pb2.ScheduleEntry(
