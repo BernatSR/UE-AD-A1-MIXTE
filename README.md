@@ -60,6 +60,23 @@ Fichier insomnia pour tous les services sauf schedule qui a un fichier de test n
 
 -- Faire un scénario et choisir les routes à montrer
 
+
+- @query.field("statsMoviesForDate") Bernat dans le fichier resolvers de Booking
+
+- def GetBestRatedMovie(self, request, context): Johanne dans le fichier schedule.py
+
+Scénario utilisateur: Le gérant du cinéma veut afficher sur l’écran d’accueil le film avec la meilleure note programmé pour la journée pour savoir lequel mettre en avant sur les paneaux d'affichage.
+On doit gérer tous les cas possibles : mauvaise date, jour sans programmation, films sans note, service Movie en panne, etc.
+
+CT1 – Date au mauvais format
+CT2 – Date au bon format mais absente du schedule
+CT3 – Date présente mais sans films
+CT4 – Un seul film avec une note valide
+CT5 – Plusieurs films, on prend le meilleur rating
+CT6 – Certains films n’existent pas / service Movie ne répond pas
+CT7 – Films avec rating invalide
+CT8 – Aucun film avec rating valide
+
 Organisation du projet:
 
 Bernat a codé + testé le service movie et user et a également mise en place la dockerisation du TP. 
