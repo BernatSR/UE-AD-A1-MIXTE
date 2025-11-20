@@ -32,6 +32,7 @@ services:
       - USE_MONGO=${USE_MONGO:-false}
       - MONGO_URL=${MONGO_URL:-mongodb://root:example@mongo:27017/?authSource=admin}
       - MONGO_DB_NAME=${MONGO_DB_NAME:-appdb}
+      - USER_URL=http://user:3203
 
   schedule:
     build: ./schedule
@@ -59,6 +60,7 @@ services:
       - USE_MONGO=${USE_MONGO:-false}
       - MONGO_URL=${MONGO_URL:-mongodb://root:example@mongo:27017/?authSource=admin}
       - MONGO_DB_NAME=${MONGO_DB_NAME:-appdb}
+      - USER_URL=http://user:3203
     depends_on:
       - movie
       - schedule

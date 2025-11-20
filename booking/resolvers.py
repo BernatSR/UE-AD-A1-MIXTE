@@ -67,7 +67,18 @@ def validate_date_str(date_str: str) -> bool:
 
 def require_admin(info):
     request = info.context["request"]
-    if request.headers.get("X-Admin", "false").lower() != "true":
+    user_id = request.headers.get("X-User-Id")
+    if not user_id:
+        raise GraphQLError("missing X-User-Id header")
+    base = os.environ.get("USER_URL", "http://localhost:3203")
+    try:
+        resp = requests.get(f"{base}/users/{user_id}/admin", timeout=3)
+    except requests.RequestException:
+        raise GraphQLError("user service unreachable")
+    if resp.status_code != 200:
+        raise GraphQLError("admin check failed")
+    data = resp.json()
+    if not bool(data.get("is_admin")):
         raise GraphQLError("admin only")
 
 
