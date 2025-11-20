@@ -18,22 +18,46 @@ Sécurisation des points d'entrées avec la vérification du rôle de l'user com
 
 Note: le service user a été modifié pour passer de la vérificaion de l'admin via le header à une vérification par une route.
 
-Commande pour démarrer les services:
+## Commandes pour démarrer les services:
 
-Powershell -> cd movie
-              python movie.py
+Powershell:
+```bash
+cd movie
+python movie.py 
+```
 
 Démarrer le fichier de test test_schedule.py:
 Nouveau Powershell
+
+```bash
 cd schedule
-pyhton test_schedule.py
+python test_schedule.py
+```
+## Lancement rapide avec Docker (JSON ou Mongo)
 
-Cas de test:
+Mode fichiers JSON (pas de Mongo, utilise les .json locaux):
+```bash
+USE_MONGO=false docker compose up -d --build
+```
 
-Fichier insomnia pour tous les services sauf schedule qui a un fichier de test nommer test_schedule.py
+Mode MongoDB (stockage dans Mongo, puis éventuellement import des JSON):
+```bash
+USE_MONGO=true docker compose up -d --build
+```
+
+Arrêt des services:
+```bash
+docker compose down
+```
+
+Variable `USE_MONGO` contrôle le backend (false = JSON, true = Mongo). Les fichiers JSON sont bind-mountés, donc toute modification locale est immédiatement visible en mode JSON.
+
+## Cas de test:
+
+Fichier insomnia pour tous les services sauf schedule qui a un fichier de test nommé test_schedule.py
 
 
--- Faire un scénarioa et choisir les routes à montrer
+-- Faire un scénario et choisir les routes à montrer
 
 Organisation du projet:
 
@@ -41,38 +65,3 @@ Bernat a codé + testé le service movie et user et a également mise en place l
 Johanne a codé + testé les autres services, fait la documentation globale.
 
 
-Si vous avez besoin, vous pouvez ajouter des flèches entre les services.
-
-
-revoir docker-compose et un autre qui met à jour la liste des films programmés pour cette date
-
-
-
-
-
---------------------------------------------------------------------------------------------------------
-
-Il ne s'agit pas d'un oral très formel, pas besoin de slides donc.
-Vous allez uniquement me présenter votre TP MIXTE dockerisé et utilisant
-MongoDB.
-
-Déroulé de l'oral:
-- 1 minute : me présenter votre architecture, un peu à l'image de la
-figure de base que j'ai donnée pour le TP Mixte avec les interactions
-entre services
-- 4/5 minutes : démo à travers Insomnia (ou équivalent) avec un scénario
-logique d'utilisation des API pour un utilisateur puis un administrateur
-(vous ne pourrez pas tout montrer donc montrez moi les routes complexes
-qui font appel à plusieurs services !)
-- 5 minutes : questions et réponses dans le code (chaque membre du
-groupe devra me décrire une route complexe que je choisirai utilisant
-d'autres API)
-
-A cette séance il faudra aussi me rendre les codes sur Moodle :
-- 1 repo Git (ou une branche mais c'est moins pratique) pour REST et un
-pour MIXTE
-- pour chacun un README pour décrire l'architecture, l'organisation du
-projet, le déploiement, etc.
-- les deux versions sont dockerisées et utilisent MongoDB (si il y a un
-moyen de choisir entre la version simple et la version Docker c'est
-encore mieux)
