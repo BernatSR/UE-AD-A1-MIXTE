@@ -7,8 +7,8 @@ from typing import List, Dict
 import requests
 import grpc
 
-from schedule import schedule_pb2
-from schedule import schedule_pb2_grpc
+import schedule_pb2
+import schedule_pb2_grpc
 
 from ariadne import (
     QueryType,
