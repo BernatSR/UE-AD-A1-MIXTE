@@ -6,3 +6,4 @@ grpcio-tools==1.76.0
 protobuf==6.32.1
 graphql-core==3.2.5
 pymongo==4.10.1
+requests
