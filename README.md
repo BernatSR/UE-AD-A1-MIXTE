@@ -61,47 +61,52 @@ Fichier insomnia pour tous les services sauf schedule qui a un fichier de test n
 Pour un utilisateur normal :
 
 créer un utilisateur
-POST/users missing name
-POST/users OK
-GET/users/{id}
-GET/users non admin montrer qu'un user n'a pas accès l'ensemble des infos users
+
+1 - POST/users missing name
+
+2- POST/users OK
+
+3- GET/users/{id} <- changer id
+
+4 -GET/users non admin montrer qu'un user n'a pas accès l'ensemble des infos users <- changer id
 
 afficher les films 
 
-Service MOVIE - POST all movies
-+ voir avec Schedule les ID des films à une date donnée
+5 - Service Movie - POST all movies
+6- + voir avec Schedule les ID des films à une date donnée
+
+7- Service Movie - movie by id <- montrer que l'on peut retrouver le film
 
 créer une réservation 
 
-POST/addBoooking
+8-POST/addBoooking
 
 récupérer des infos 
 
-POST/bookingDetails
+9- POST/bookingDetails
 
 supprimer une réservation 
 
-POST/deleteBooking
+10 - POST/deleteBooking
+11- POST/bookingDetails <- voir qu'un seul des 2 films est supprimé
 
-Supprimer l'utilisateur:
- DELETE/users/{id}
 
 Pour un administrateur : 
 
 avoir accès à la liste des users
 
-GET/users admin OK
-GET/users/{id}/admin -> true
+12 -GET/users admin OK
+13 - GET/users/{id}/admin -> true
 
-Service Boonking - regarder toutes les réservations
+Service Booking - regarder toutes les réservations
 
-POST/all_booking
+14 - POST/all_booking
 
 Service Booking - afficher les statistiques
 
-POST/statsMoviesForDate
+15 - POST/statsMoviesForDate
 
-Service schedule - afficher le film avec la meilleure note pour une date
+16 - Service schedule - afficher le film avec la meilleure note pour une date
 
 
 
