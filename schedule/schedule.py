@@ -260,6 +260,9 @@ class ScheduleServicer(schedule_pb2_grpc.ScheduleServicer):
 
     # Présentation Johanne
     # GET /showmovies/<date>/best-rated
+
+    #self = instance de la classe -> permet d'accéder aux objects
+    #context -> utiliser pour les erreurs
     def GetBestRatedMovie(self, request, context):
         date = request.date
 

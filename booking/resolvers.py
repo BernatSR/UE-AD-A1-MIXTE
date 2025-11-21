@@ -225,6 +225,7 @@ def resolve_stats_movies_for_date(_, info, date):
     return {"date": date, "movies": items_sorted}
 
 
+# Présentation Johanne
 @mutation.field("addBooking")
 def resolve_add_booking(_, info, userid, date, movies):
     if not validate_date_str(date):
