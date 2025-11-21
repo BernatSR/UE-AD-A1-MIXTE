@@ -58,24 +58,52 @@ Variable `USE_MONGO` contrôle le backend (false = JSON, true = Mongo). Les fich
 Fichier insomnia pour tous les services sauf schedule qui a un fichier de test nommé test_schedule.py
 
 
--- Faire un scénario et choisir les routes à montrer
+Pour un utilisateur normal :
+
+créer un utilisateur
+POST/users missing name
+POST/users OK
+GET/users/{id}
+GET/users non admin montrer qu'un user n'a pas accès l'ensemble des infos users
+
+afficher les films 
+
+Service MOVIE - POST all movies
++ voir avec Schedule les ID des films à une date donnée
+
+créer une réservation 
+
+POST/addBoooking
+
+récupérer des infos 
+
+POST/bookingDetails
+
+supprimer une réservation 
+
+POST/deleteBooking
+
+Supprimer l'utilisateur:
+ DELETE/users/{id}
+
+Pour un administrateur : 
+
+avoir accès à la liste des users
+
+GET/users admin OK
+GET/users/{id}/admin -> true
+
+Service Boonking - regarder toutes les réservations
+
+POST/all_booking
+
+Service Booking - afficher les statistiques
+
+POST/statsMoviesForDate
+
+Service schedule - afficher le film avec la meilleure note pour une date
 
 
-- @query.field("statsMoviesForDate") Bernat dans le fichier resolvers de Booking
-
-- def GetBestRatedMovie(self, request, context): Johanne dans le fichier schedule.py
-
-Scénario utilisateur: Le gérant du cinéma veut afficher sur l’écran d’accueil le film avec la meilleure note programmé pour la journée pour savoir lequel mettre en avant sur les paneaux d'affichage.
-On doit gérer tous les cas possibles : mauvaise date, jour sans programmation, films sans note, service Movie en panne, etc.
-
-CT1 – Date au mauvais format
-CT2 – Date au bon format mais absente du schedule
-CT3 – Date présente mais sans films
-CT4 – Un seul film avec une note valide
-CT5 – Plusieurs films, on prend le meilleur rating
-CT6 – Certains films n’existent pas / service Movie ne répond pas
-CT7 – Films avec rating invalide
-CT8 – Aucun film avec rating valide
 
 Organisation du projet:
 
