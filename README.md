@@ -37,6 +37,7 @@ python test_schedule.py
 ## Lancement rapide avec Docker (JSON ou Mongo)
 
 Mode fichiers JSON (pas de Mongo, utilise les .json locaux):
+Linux / macOS:
 ```bash
 USE_MONGO=false docker compose up -d --build
 ```
@@ -46,11 +47,7 @@ PowerShell:
 $env:USE_MONGO="false"
 docker compose up -d --build
 ```
-CMD:
-```cmd
-set USE_MONGO=false
-docker compose up -d --build
-```
+
 
 Mode MongoDB (stockage dans Mongo, puis éventuellement import des JSON):
 ```bash
@@ -62,11 +59,6 @@ PowerShell:
 $env:USE_MONGO="true"
 docker compose up -d --build
 ```
-CMD:
-```cmd
-set USE_MONGO=true
-docker compose up -d --build
-```
 
 Arrêt des services:
 ```bash
@@ -74,6 +66,27 @@ docker compose down
 ```
 
 Variable `USE_MONGO` contrôle le backend (false = JSON, true = Mongo). Les fichiers JSON sont bind-mountés, donc toute modification locale est immédiatement visible en mode JSON.
+
+### Import des données JSON dans MongoDB
+
+Vous pouvez importer les fichiers .json dans Mongo quand le conteneur Mongo est démarré avec `USE_MONGO=true`.
+
+Linux / macOS:
+```bash
+python import_to_mongo.py
+```
+
+Windows PowerShell:
+```powershell
+python .\import_to_mongo.py
+```
+
+Le script lit et importe les fichiers suivants:
+- movie/data/movies.json, actors.json
+- user/data/users.json
+- booking/data/bookings.json
+- schedule/data/times.json
+
 
 ## Cas de test:
 
@@ -131,10 +144,7 @@ Service Booking - afficher les statistiques
 16 - Service schedule - afficher le film avec la meilleure note pour une date
 
 
-
 Organisation du projet:
 
 Bernat a codé + testé le service movie et user et a également mise en place la dockerisation du TP. 
 Johanne a codé + testé les autres services, fait la documentation globale.
-
-
