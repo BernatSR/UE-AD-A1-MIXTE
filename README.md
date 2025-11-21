@@ -40,10 +40,32 @@ Mode fichiers JSON (pas de Mongo, utilise les .json locaux):
 ```bash
 USE_MONGO=false docker compose up -d --build
 ```
+Windows:
+PowerShell:
+```powershell
+$env:USE_MONGO="false"
+docker compose up -d --build
+```
+CMD:
+```cmd
+set USE_MONGO=false
+docker compose up -d --build
+```
 
 Mode MongoDB (stockage dans Mongo, puis éventuellement import des JSON):
 ```bash
 USE_MONGO=true docker compose up -d --build
+```
+Windows:
+PowerShell:
+```powershell
+$env:USE_MONGO="true"
+docker compose up -d --build
+```
+CMD:
+```cmd
+set USE_MONGO=true
+docker compose up -d --build
 ```
 
 Arrêt des services:
